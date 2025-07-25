@@ -1,0 +1,42 @@
+body, html, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: 'Arial', sans-serif;
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+}
+
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+.left-pane {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  border-right: 2px solid #333;
+}
+
+.objekte-bereich {
+  flex: 1;
+  border-bottom: 2px solid #333;
+  padding: 10px;
+  background-color: #2b2b2b;
+}
+
+.code-bereich {
+  flex: 1;
+  padding: 10px;
+  background-color: #252525;
+  overflow: auto;
+}
+
+.system-bereich {
+  width: 50%;
+  padding: 10px;
+  background-color: #1a1a1a;
+}
+

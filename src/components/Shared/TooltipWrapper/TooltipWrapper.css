@@ -1,0 +1,25 @@
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-content {
+  position: absolute;
+  top: 100%;
+  left: 130%;
+  transform: translateX(-50%);
+  margin-top: 8px;
+  background-color: #1e1e1e;
+  border: 1px solid #666;
+  border-radius: 4px;
+  padding: 4px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.tooltip-content img {
+  width: 200px;
+  height: auto;
+  display: block;
+}
+
