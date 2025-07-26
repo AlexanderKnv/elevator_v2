@@ -29,6 +29,9 @@ body, html, #root {
 
 .code-bereich {
   flex: 1;
+  display: flex; /* обязательно */
+  width: 100%;        /* ✅ обязательно */
+  max-width: 100%;    /* 🔒 защита от переполнения */
   padding: 10px;
   background-color: #252525;
   overflow: auto;

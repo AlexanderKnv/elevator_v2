@@ -3,30 +3,20 @@ import { useDrop } from 'react-dnd';
 import { useDispatch, useSelector } from 'react-redux';
 import { type RootState } from '../../../store/store';
 import { addEtage } from '../../../store/etageSlice';
-import { addKabine  } from '../../../store/kabineSlice';
+import EtageVisual from './EtageVisual';
+
 const MAX_ETAGEN = 3;
-//@ts-ignore
+
 const EtageZone: React.FC = () => {
   const dispatch = useDispatch();
   const etagen = useSelector((state: RootState) => state.etage.etagen);
-  // const kabinen = useSelector((state: RootState) => state.kabine.kabinen);
 
-
-  const [{ isOver: isOver1 }, dropRef] = useDrop(() => ({
+  const [{ isOver: isOverEtage }, dropRefEtage] = useDrop(() => ({
     accept: 'ETAGE',
     drop: () => {
-      dispatch(addEtage());
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-    }),
-  }));
-
-    const [{  }, dropRefd] = useDrop(() => ({
-    accept: 'KABINE',
-    // canDrop: () => etagen.length > 0 && kabinen.length < 1,
-    drop: () => {
-      dispatch(addKabine({ etage: 1 })); // Всегда добавляем на первый этаж
+      if (etagen.length < MAX_ETAGEN) {
+        dispatch(addEtage());
+      }
     },
     collect: (monitor) => ({
       isOver: monitor.isOver(),
@@ -35,20 +25,28 @@ const EtageZone: React.FC = () => {
 
   return (
     //@ts-ignore
-    <div ref={dropRef} className="etagen-container">
-
+    <div ref={dropRefEtage} className="etagen-container" style={{ position: 'relative' }}>
       {[...etagen].reverse().map((nr) => (
-    //@ts-ignore
-
-        <div key={nr} ref={dropRefd} className="etage-visual">
-          <div className="etageCircle">{nr}</div>
-          <div className="inner-zone">
-      </div>
-        </div>
+        <EtageVisual key={nr} etageNumber={nr} />
       ))}
-      
-      {isOver1 && etagen.length < MAX_ETAGEN && (
-        <div className="overlay" style={{ top: `${(3 - etagen.length - 1) * 33.33}%` }}>
+
+      {isOverEtage && etagen.length < MAX_ETAGEN && (
+        <div
+          className="overlay-etage"
+          style={{
+            position: 'absolute',
+            top: `${(3 - etagen.length - 1) * 33.33}%`,
+            left: 0,
+            right: 0,
+            height: '33.33%',
+            backgroundColor: 'rgba(0, 0, 255, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 'bold',
+            color: '#000',
+          }}
+        >
           + Etage
         </div>
       )}
