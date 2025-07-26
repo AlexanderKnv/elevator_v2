@@ -6,7 +6,6 @@ import KabineItem from '../KabineItem/KabineItem';
 const ObjekteBereich: React.FC = () => {
   return (
     <div className="objekte-bereich">
-      <h3>Objekte-Bereich</h3>
       <div style={{ display: 'flex', flexWrap: 'wrap' }}>
         <EtageItem />
         <KabineItem/>

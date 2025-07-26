@@ -1,0 +1,27 @@
+.select-dark {
+    background-color: #383333;
+    color: #ffffff;
+    border: 1px solid #555;
+    width: 180px;
+}
+
+.select {
+    font-family: monospace;
+    line-height: 1.4;
+    margin: 10px;
+}
+
+.option-select {
+        font-family: monospace ;
+        color: red;
+
+}
+
+.select-dark:focus {
+  border-color: #3a8dff;
+}
+
+.select-dark option {
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
