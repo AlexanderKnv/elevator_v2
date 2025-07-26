@@ -16,7 +16,12 @@ export const etageSlice = createSlice({
     addEtage: (state) => {
       if (state.etagen.length < 3) {
         const newEtage = state.etagen.length + 1;
+        // console.log(newEtage)
         state.etagen.push(newEtage);
+        // console.log(state.etagen.length)
+// console.log('Текущий массив:', [...state.etagen]);
+
+
       }
     },
     resetEtagen: (state) => {

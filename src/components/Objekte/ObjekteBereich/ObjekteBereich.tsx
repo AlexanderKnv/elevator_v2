@@ -1,5 +1,6 @@
 import React from 'react';
 import EtageItem from '../EtageItem/EtageItem';
+import KabineItem from '../KabineItem/KabineItem';
 
 
 const ObjekteBereich: React.FC = () => {
@@ -8,6 +9,7 @@ const ObjekteBereich: React.FC = () => {
       <h3>Objekte-Bereich</h3>
       <div style={{ display: 'flex', flexWrap: 'wrap' }}>
         <EtageItem />
+        <KabineItem/>
       </div>
     </div>
   );
