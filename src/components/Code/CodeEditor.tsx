@@ -8,11 +8,15 @@ import { generateDeklarativEtagenCode } from './codegen/deklarativ/etagen';
 import { generateImperativEtagenCode } from './codegen/imperativ/etagen';
 import { generateOopEtagenCode } from './codegen/oop/etagen';
 import './CodeEditor.css';
+import { generateDeklarativKabinenCode } from './codegen/deklarativ/kabinen';
+import { generateImperativKabinenCode } from './codegen/imperativ/kabinen';
+import { generateOopKabinenCode } from './codegen/oop/kabinen';
 
 type CodeStyle = 'Deklarativ' | 'Imperativ' | 'OOP';
 
 export default function CodeEditor() {
   const etagen = useSelector((state: RootState) => state.etage.etagen);
+  const kabinen = useSelector((state: RootState) => state.kabine.kabinen);
   const [style, setStyle] = useState<CodeStyle>('Deklarativ');
 
   const WELCOME_LINE =
@@ -21,21 +25,30 @@ export default function CodeEditor() {
   const [code, setCode] = useState(WELCOME_LINE);
 
   useEffect(() => {
-    let generated = '';
-    switch (style) {
-      case 'Deklarativ':
-        generated = generateDeklarativEtagenCode(etagen);
-        break;
-      case 'Imperativ':
-        generated = generateImperativEtagenCode(etagen);
-        break;
-      case 'OOP':
-        generated = generateOopEtagenCode(etagen);
-        break;
-    }
+    let generatedEtagen = '';
+    let generatedKabinen = '';
 
-    setCode(generated ? `${generated}` : WELCOME_LINE);
-  }, [etagen, style]);
+  switch (style) {
+    case 'Deklarativ':
+      generatedEtagen = generateDeklarativEtagenCode(etagen);
+      generatedKabinen = generateDeklarativKabinenCode(kabinen);
+      break;
+    case 'Imperativ':
+      generatedEtagen = generateImperativEtagenCode(etagen);
+      generatedKabinen = generateImperativKabinenCode(kabinen);
+      break;
+    case 'OOP':
+      generatedEtagen = generateOopEtagenCode(etagen);
+      generatedKabinen = generateOopKabinenCode(kabinen);
+      break;
+  }
+
+    const combinedCode = [generatedEtagen, generatedKabinen]
+    .filter(Boolean)
+    .join('\n\n');
+
+    setCode(combinedCode ? `${combinedCode}` : WELCOME_LINE);
+  }, [etagen, kabinen, style]);
 
   return (
     <div style={{ border: '1px solid #ccc', borderRadius: 4,  width: '100%', marginRight: "20px" }}>

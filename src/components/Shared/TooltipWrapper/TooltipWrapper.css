@@ -6,7 +6,7 @@
 .tooltip-content {
   position: absolute;
   top: 100%;
-  left: 130%;
+  left: 150%;
   transform: translateX(-50%);
   margin-top: 8px;
   background-color: #1e1e1e;
@@ -18,7 +18,7 @@
 }
 
 .tooltip-content img {
-  width: 200px;
+  width: 250px;
   height: auto;
   display: block;
 }
