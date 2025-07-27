@@ -14,17 +14,25 @@
 .door {
   width: 50%;
   background-color: #ccc;
-  transition: transform 0.5s ease;
+  transition: transform 3s ease-in-out;
 }
 
 .door.left {
   border-right: 1px solid #666;
+    transform: translateX(0%);
+}
+
+.door.left.open {
+  transform: translateX(-100%);
 }
 
 .door.right {
   border-left: 1px solid #666;
+    transform: translateX(0%);
 }
 
-
+.door.right.open {
+  transform: translateX(100%);
+}
 
 

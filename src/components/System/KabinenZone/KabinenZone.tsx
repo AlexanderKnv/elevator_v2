@@ -2,6 +2,7 @@ import React from 'react';
 import './KabinenZone.css';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../../store/store';
+
 const KabinenZone: React.FC = () => {
   const kabine = useSelector((state: RootState) => state.kabine.kabinen[0]);
   const totalEtagen = useSelector((state: RootState) => state.etage.etagen.length);
@@ -15,8 +16,8 @@ const KabinenZone: React.FC = () => {
         top: `${top}%`,
       }}
     >
-      <div className="door left" />
-      <div className="door right" />
+      <div className={`door left ${kabine.doorsOpen ? 'open' : ''}`} />
+      <div className={`door right ${kabine.doorsOpen ? 'open' : ''}`} />
     </div>
   );
 };
