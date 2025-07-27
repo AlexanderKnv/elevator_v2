@@ -7,19 +7,15 @@ import type { RootState } from '../../store/store';
 import './CodeEditor.css';
 import { generateCode, type CodeStyle } from './codegen/codegen';
 import { resetEtagen } from '../../store/etageSlice';
-import { parseDeklarativEtagenCode } from './codegen/deklarativ/parseEtagen';
 import { debounce } from 'lodash';
-import { parseImperativEtagenCode } from './codegen/imperativ/parseEtagen';
-import { parseOopEtagenCode } from './codegen/oop/parseEtagen';
-import { resetKabinen, type Kabine } from '../../store/kabineSlice';
-import { parseDeklarativKabinenCode } from './codegen/deklarativ/parseKabinen';
-import { parseImperativKabinenCode } from './codegen/imperativ/parseKabinen';
-import { parseOopKabinenCode } from './codegen/oop/parseKabinen';
+import { resetKabinen } from '../../store/kabineSlice';
+import { parseCode } from './codegen/parse';
 
 export default function CodeEditor() {
   const etagen = useSelector((state: RootState) => state.etage.etagen);
   const kabinen = useSelector((state: RootState) => state.kabine.kabinen);
   const [style, setStyle] = useState<CodeStyle>('Deklarativ');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [code, setCode] = useState('');
   const dispatch = useDispatch();
 
@@ -29,30 +25,15 @@ export default function CodeEditor() {
 
   const handleCodeChange = useMemo(() => debounce((newCode: string) => {
     setCode(newCode);
+    setErrorMessage(null);
+    try {
+    const { etagen: parsedEtagen, kabinen: parsedKabinen } = parseCode(style, newCode);
 
-    let parsedEtagen: number[] = [];
-    let parsedKabinen: Kabine[] = [];
-
-    switch (style) {
-      case 'Deklarativ':
-        parsedEtagen = parseDeklarativEtagenCode(newCode);
-        parsedKabinen = parseDeklarativKabinenCode(newCode);
-        break;
-      case 'Imperativ':
-        parsedEtagen = parseImperativEtagenCode(newCode);
-        parsedKabinen = parseImperativKabinenCode(newCode);
-        break;
-      case 'OOP':
-        parsedEtagen = parseOopEtagenCode(newCode);
-        parsedKabinen = parseOopKabinenCode(newCode);
-        break;
-    }
-
-    if (parsedEtagen.length > 0 || etagen.length > 0)
-      dispatch(resetEtagen(parsedEtagen));
-
-    if (parsedKabinen.length > 0 || kabinen.length > 0)
-      dispatch(resetKabinen(parsedKabinen));
+    if (parsedEtagen) dispatch(resetEtagen(parsedEtagen));
+    if (parsedKabinen) dispatch(resetKabinen(parsedKabinen));
+  } catch (err) {
+    setErrorMessage("Fehler beim Parsen des Codes. Bitte Syntax überprüfen.");
+  }
   }, 3000), [style, etagen, kabinen]);
 
   return (
@@ -78,6 +59,11 @@ export default function CodeEditor() {
         onChange={(value) => handleCodeChange(value)}
         theme={oneDark}
       />
+      {errorMessage && (
+        <div style={{ color: 'red', marginTop: 8 }}>
+          ⚠️ {errorMessage}
+        </div>
+      )}
     </div>
   );
 }

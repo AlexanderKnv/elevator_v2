@@ -6,18 +6,7 @@ const KabinenZone: React.FC = () => {
   const kabine = useSelector((state: RootState) => state.kabine.kabinen[0]);
   const totalEtagen = useSelector((state: RootState) => state.etage.etagen.length);
   if (!kabine || totalEtagen === 0) return null;
-
-  // const etageHeight = 100 / 3;
-  // const top = (1 - 1) * etageHeight;
-
-    console.log(kabine)
-        console.log(totalEtagen)
-
-
-
-      const top = (3 - kabine.currentEtage) * (100 / 3);
-
-
+    const top = (3 - kabine.currentEtage) * (100 / 3);
 
   return (
     <div
