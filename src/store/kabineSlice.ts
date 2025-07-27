@@ -20,17 +20,19 @@ const kabineSlice = createSlice({
   initialState,
   reducers: {
     addKabine: (state, action: PayloadAction<{ etage: number }>) => {
-      if (state.kabinen.length < 1) {
-        state.kabinen.push({
-          id: `kabine-1`,
-          currentEtage: action.payload.etage,
-          doorsOpen: false,
-        });
-      }
+      const nextId = `kabine-${state.kabinen.length + 1}`;
+      state.kabinen.push({
+        id: nextId,
+        currentEtage: action.payload.etage,
+        doorsOpen: false,
+      });
+    },
+    resetKabinen: (state, action: PayloadAction<Kabine[]>) => {
+      state.kabinen = action.payload;
     },
   },
 });
 
-export const { addKabine } = kabineSlice.actions;
+export const { addKabine, resetKabinen } = kabineSlice.actions;
 export default kabineSlice.reducer;
 

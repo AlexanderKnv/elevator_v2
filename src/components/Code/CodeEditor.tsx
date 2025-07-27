@@ -11,6 +11,10 @@ import { parseDeklarativEtagenCode } from './codegen/deklarativ/parseEtagen';
 import { debounce } from 'lodash';
 import { parseImperativEtagenCode } from './codegen/imperativ/parseEtagen';
 import { parseOopEtagenCode } from './codegen/oop/parseEtagen';
+import { resetKabinen, type Kabine } from '../../store/kabineSlice';
+import { parseDeklarativKabinenCode } from './codegen/deklarativ/parseKabinen';
+import { parseImperativKabinenCode } from './codegen/imperativ/parseKabinen';
+import { parseOopKabinenCode } from './codegen/oop/parseKabinen';
 
 export default function CodeEditor() {
   const etagen = useSelector((state: RootState) => state.etage.etagen);
@@ -26,23 +30,29 @@ export default function CodeEditor() {
   const handleCodeChange = useMemo(() => debounce((newCode: string) => {
     setCode(newCode);
 
-    let parsed: number[] = [];
+    let parsedEtagen: number[] = [];
+    let parsedKabinen: Kabine[] = [];
 
     switch (style) {
       case 'Deklarativ':
-        parsed = parseDeklarativEtagenCode(newCode);
+        parsedEtagen = parseDeklarativEtagenCode(newCode);
+        parsedKabinen = parseDeklarativKabinenCode(newCode);
         break;
       case 'Imperativ':
-        parsed = parseImperativEtagenCode(newCode);
+        parsedEtagen = parseImperativEtagenCode(newCode);
+        parsedKabinen = parseImperativKabinenCode(newCode);
         break;
       case 'OOP':
-        parsed = parseOopEtagenCode(newCode);
+        parsedEtagen = parseOopEtagenCode(newCode);
+        parsedKabinen = parseOopKabinenCode(newCode);
         break;
     }
 
-    if (parsed.length > 0 || etagen.length > 0) {
-      dispatch(resetEtagen(parsed));
-    }
+    if (parsedEtagen.length > 0 || etagen.length > 0)
+      dispatch(resetEtagen(parsedEtagen));
+
+    if (parsedKabinen.length > 0 || kabinen.length > 0)
+      dispatch(resetKabinen(parsedKabinen));
   }, 3000), [style, etagen, kabinen]);
 
   return (
