@@ -1,38 +1,36 @@
 .lift-cabin {
-  position: absolute;
-  left: 10%;
-  width: 120px;
-  height: 25%;
-  background-color: #888;
-  display: flex;
-  overflow: hidden;
-  z-index: 10;
-  transition: top 3s ease;
-  margin-top: 55px;
+    position: absolute;
+    left: 10%;
+    width: 120px;
+    height: 25%;
+    background-color: #888;
+    display: flex;
+    overflow: hidden;
+    z-index: 10;
+    transition: top 3s ease;
+    margin-top: 55px;
 }
 
 .door {
-  width: 50%;
-  background-color: #ccc;
-  transition: transform 3s ease-in-out;
+    width: 50%;
+    background-color: #ccc;
+    transition: transform 3s ease-in-out;
 }
 
 .door.left {
-  border-right: 1px solid #666;
+    border-right: 1px solid #666;
     transform: translateX(0%);
 }
 
 .door.left.open {
-  transform: translateX(-100%);
+    transform: translateX(-100%);
 }
 
 .door.right {
-  border-left: 1px solid #666;
+    border-left: 1px solid #666;
     transform: translateX(0%);
 }
 
 .door.right.open {
-  transform: translateX(100%);
+    transform: translateX(100%);
 }
-
-

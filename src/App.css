@@ -1,45 +1,46 @@
-body, html, #root {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
-  font-family: 'Arial', sans-serif;
-  background-color: #1e1e1e;
-  color: #f0f0f0;
+body,
+html,
+#root {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    font-family: 'Arial', sans-serif;
+    background-color: #1e1e1e;
+    color: #f0f0f0;
 }
 
 .app {
-  display: flex;
-  height: 100vh;
+    display: flex;
+    height: 100vh;
 }
 
 .left-pane {
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-  border-right: 2px solid #333;
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    border-right: 2px solid #333;
 }
 
 .objekte-bereich {
-  flex: 1;
-  border-bottom: 2px solid #333;
-  padding: 10px;
-  background-color: #2b2b2b;
+    flex: 1;
+    border-bottom: 2px solid #333;
+    padding: 10px;
+    background-color: #2b2b2b;
 }
 
 .code-bereich {
-  flex: 1;
-  display: flex; /* обязательно */
-  width: 100%;        /* ✅ обязательно */
-  max-width: 100%;    /* 🔒 защита от переполнения */
-  padding: 10px;
-  background-color: #252525;
-  overflow: auto;
+    flex: 1;
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    background-color: #252525;
+    overflow: auto;
 }
 
 .system-bereich {
-  width: 50%;
-  padding: 0 10px;
-  background-color: #1a1a1a;
+    width: 50%;
+    padding: 0 10px;
+    background-color: #1a1a1a;
 }
-

@@ -1,17 +1,8 @@
 .system-bereich {
-  width: 50%;
-  background-color: #1a1a1a;
-  /* padding: 10px; */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  position: relative;
+    width: 50%;
+    background-color: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
 }
-
-/* .system-head {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  color: #888;
-  font-size: 14px;
-} */

@@ -1,27 +1,27 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface EtageState {
-  etagen: number[];
+    etagen: number[];
 }
 
 const initialState: EtageState = {
-  etagen: [],
+    etagen: [],
 };
 
 export const etageSlice = createSlice({
-  name: 'etage',
-  initialState,
-  reducers: {
-    addEtage: (state) => {
-      if (state.etagen.length < 3) {
-        const newEtage = state.etagen.length + 1;
-        state.etagen.push(newEtage);
-      }
+    name: 'etage',
+    initialState,
+    reducers: {
+        addEtage: (state) => {
+            if (state.etagen.length < 3) {
+                const newEtage = state.etagen.length + 1;
+                state.etagen.push(newEtage);
+            }
+        },
+        resetEtagen: (state, action: PayloadAction<number[]>) => {
+            state.etagen = action.payload;
+        },
     },
-    resetEtagen: (state, action: PayloadAction<number[]>) => {
-      state.etagen = action.payload;
-    },
-  },
 });
 
 export const { addEtage, resetEtagen } = etageSlice.actions;

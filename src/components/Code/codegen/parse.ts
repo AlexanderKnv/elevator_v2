@@ -1,11 +1,9 @@
 import { parseDeklarativEtagenCode } from './deklarativ/parseEtagen';
 import { parseImperativEtagenCode } from './imperativ/parseEtagen';
 import { parseOopEtagenCode } from './oop/parseEtagen';
-
 import { parseDeklarativKabinenCode } from './deklarativ/parseKabinen';
 import { parseImperativKabinenCode } from './imperativ/parseKabinen';
 import { parseOopKabinenCode } from './oop/parseKabinen';
-
 import type { Kabine } from '../../../store/kabineSlice';
 import type { CodeStyle } from './codegen';
 

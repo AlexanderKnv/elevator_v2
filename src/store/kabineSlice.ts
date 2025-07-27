@@ -1,36 +1,35 @@
-// store/slices/kabineSlice.ts
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 export interface Kabine {
-  id: string;
-  currentEtage: number;
-  doorsOpen: boolean;
+    id: string;
+    currentEtage: number;
+    doorsOpen: boolean;
 }
 
 interface KabineState {
-  kabinen: Kabine[];
+    kabinen: Kabine[];
 }
 
 const initialState: KabineState = {
-  kabinen: [],
+    kabinen: [],
 };
 
 const kabineSlice = createSlice({
-  name: 'kabine',
-  initialState,
-  reducers: {
-    addKabine: (state, action: PayloadAction<{ etage: number }>) => {
-      const nextId = `kabine-${state.kabinen.length + 1}`;
-      state.kabinen.push({
-        id: nextId,
-        currentEtage: action.payload.etage,
-        doorsOpen: false,
-      });
+    name: 'kabine',
+    initialState,
+    reducers: {
+        addKabine: (state, action: PayloadAction<{ etage: number }>) => {
+            const nextId = `kabine-${state.kabinen.length + 1}`;
+            state.kabinen.push({
+                id: nextId,
+                currentEtage: action.payload.etage,
+                doorsOpen: false,
+            });
+        },
+        resetKabinen: (state, action: PayloadAction<Kabine[]>) => {
+            state.kabinen = action.payload;
+        },
     },
-    resetKabinen: (state, action: PayloadAction<Kabine[]>) => {
-      state.kabinen = action.payload;
-    },
-  },
 });
 
 export const { addKabine, resetKabinen } = kabineSlice.actions;

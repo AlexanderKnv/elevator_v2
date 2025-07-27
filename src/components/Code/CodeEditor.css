@@ -12,16 +12,15 @@
 }
 
 .option-select {
-        font-family: monospace ;
-        color: red;
-
+    font-family: monospace;
+    color: red;
 }
 
 .select-dark:focus {
-  border-color: #3a8dff;
+    border-color: #3a8dff;
 }
 
 .select-dark option {
-  background-color: #383333;
-  color: #ffffff;
+    background-color: #383333;
+    color: #ffffff;
 }

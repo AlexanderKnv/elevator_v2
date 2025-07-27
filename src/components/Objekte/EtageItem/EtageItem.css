@@ -1,43 +1,43 @@
 .etage-item {
-  position: relative;
-  background-color: #3a3a3a;
-  border: 1px solid #555;
-  border-radius: 8px;
-  padding: 6px 0;
-  width: 70px;
-  margin: 8px;
-  text-align: center;
-  cursor: grab;
-  transition: background-color 0.2s;
+    position: relative;
+    background-color: #3a3a3a;
+    border: 1px solid #555;
+    border-radius: 8px;
+    padding: 6px 0;
+    width: 70px;
+    margin: 8px;
+    text-align: center;
+    cursor: grab;
+    transition: background-color 0.2s;
 }
 
 .etage-item:hover {
-  background-color: #4a4a4a;
+    background-color: #4a4a4a;
 }
 
 .etage-icon {
-  font-size: 24px;
-  margin-bottom: 5px;
+    font-size: 24px;
+    margin-bottom: 5px;
 }
 
 .etage-label {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 .etage-tooltip {
-  position: absolute;
-  top: 100%;
-  left: 130%;
-  transform: translateX(-50%);
-  margin-top: 8px;
-  padding: 4px;
-  background-color: #1e1e1e;
-  border: 1px solid #666;
-  border-radius: 4px;
-  z-index: 10;
+    position: absolute;
+    top: 100%;
+    left: 130%;
+    transform: translateX(-50%);
+    margin-top: 8px;
+    padding: 4px;
+    background-color: #1e1e1e;
+    border: 1px solid #666;
+    border-radius: 4px;
+    z-index: 10;
 }
 
 .etage-tooltip img {
-  width: 200px;
-  height: auto;
+    width: 200px;
+    height: auto;
 }
