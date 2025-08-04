@@ -36,7 +36,7 @@ export default function CodeEditor() {
     };
 
     return (
-        <div style={{ border: '1px solid #ccc', borderRadius: 4, width: '100%', marginRight: "20px" }}>
+        <div style={{ border: '1px solid #ccc', borderRadius: 4, width: '100%' }}>
             <div className="header">
                 <button onClick={handleRun} className="run-button">
                     ▶ Run

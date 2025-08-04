@@ -6,13 +6,11 @@ import { SystemBereich } from './components/System';
 function App() {
     return (
         <div className="app">
-            <div className="left-pane">
-                <ObjekteBereich />
-                <div className="code-bereich">
-                    <CodeEditor />
-                </div>
-            </div>
+            <ObjekteBereich />
             <SystemBereich />
+            <div className="code-bereich">
+                <CodeEditor />
+            </div>
         </div>
     );
 }
