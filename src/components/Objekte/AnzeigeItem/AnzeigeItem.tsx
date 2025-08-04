@@ -1,12 +1,12 @@
 import React from 'react';
-import './KabineItem.css';
-import KabineImage from '../../../assets/Kabine.png';
+import './AnzeigeItem.css';
+import AnzeigeImage from '../../../assets/Anzeige.png';
 import TooltipWrapper from '../../Shared/TooltipWrapper/TooltipWrapper';
 import { useDrag } from 'react-dnd';
 
-const KabineItem: React.FC = () => {
+const AnzeigeItem: React.FC = () => {
     const [{ isDragging }, dragRef] = useDrag(() => ({
-        type: 'KABINE',
+        type: 'ANZEIGE',
         item: {},
         collect: (monitor) => ({
             isDragging: monitor.isDragging(),
@@ -17,17 +17,17 @@ const KabineItem: React.FC = () => {
         <TooltipWrapper
             dragRef={dragRef}
             isDragging={isDragging}
-            tooltipContent={<img src={KabineImage} alt="Kabine Vorschau" />}
+            tooltipContent={<img src={AnzeigeImage} alt="Anzeige Vorschau" />}
         >
             <div
-                className="kabine-item"
+                className="anzeige-item"
                 style={{ opacity: isDragging ? 0.5 : 1 }}
             >
-                <div className="kabine-icon">🛗</div>
-                <div className="kabine-label">Kabine</div>
+                <div className="anzeige-icon">⬇️</div>
+                <div className="anzeige-label">Anzeige</div>
             </div>
         </TooltipWrapper>
     );
 };
 
-export default KabineItem;
+export default AnzeigeItem;

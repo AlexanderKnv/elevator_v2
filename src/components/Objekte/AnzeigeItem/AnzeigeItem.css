@@ -1,0 +1,24 @@
+.anzeige-item {
+    background-color: #3a3a3a;
+    border: 1px solid #555;
+    border-radius: 8px;
+    padding: 6px 0;
+    width: 70px;
+    margin: 8px;
+    text-align: center;
+    cursor: grab;
+    transition: background-color 0.2s;
+}
+
+.anzeige-item:hover {
+    background-color: #4a4a4a;
+}
+
+.anzeige-icon {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.anzeige-label {
+    font-size: 14px;
+}
