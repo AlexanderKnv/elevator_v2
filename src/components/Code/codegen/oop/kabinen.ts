@@ -1,23 +1,22 @@
 import type { Kabine } from "../../../../store/kabineSlice";
 
 export function generateOopKabinenCode(kabinen: Kabine[]): string {
-    if (kabinen.length === 0) return '';
+    if (!kabinen.length) return '';
 
-    const instances = kabinen
-        .map(
-            (k) =>
-                `kabine_${k.id.split('-')[1]} = Kabine(${k.id.split('-')[1]}, ${k.currentEtage}, tuer_offen=${k.doorsOpen})`
-        )
-        .join('\n');
+    const classDef = `
+class Kabine:
+    def __init__(self, id, etage, tuer_offen=False):
+        self.id = id
+        self.etage = etage
+        self.tuer_offen = tuer_offen
+`.trim();
 
-    return [
-        'class Kabine:',
-        '    def __init__(self, id, etage, tuer_offen=False):',
-        '        self.id = id',
-        '        self.etage = etage',
-        '        self.tuer_offen = tuer_offen',
-        '',
-        instances,
-    ].join('\n');
+    const instances = kabinen.map((kabine, index) => {
+        const id = index + 1;
+        const etageVar = `etage_${kabine.currentEtage}`;
+        const tuer = kabine.doorsOpen ? 'true' : 'false';
+        return `kabine_${id} = Kabine(${id}, ${etageVar}, tuer_offen=${tuer})`;
+    });
+
+    return `${classDef}\n\n${instances.join('\n')}`;
 }
-

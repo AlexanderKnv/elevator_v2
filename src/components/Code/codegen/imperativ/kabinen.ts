@@ -1,13 +1,17 @@
 import type { Kabine } from "../../../../store/kabineSlice";
 
 export function generateImperativKabinenCode(kabinen: Kabine[]): string {
-    if (kabinen.length === 0) return '';
+    if (!kabinen.length) return '';
 
-    return kabinen
-        .map(
-            (k) =>
-                `kabine_${k.id.split('-')[1]}_etage = ${k.currentEtage}\n` +
-                `kabine_${k.id.split('-')[1]}_tuer_offen = ${k.doorsOpen}`
-        )
-        .join('\n\n');
+    const lines = kabinen.map((kabine, i) => {
+        const id = i + 1;
+
+        const tuerLine = `kabine_${id}_tuer_offen = ${kabine.doorsOpen.toString()}`;
+        const etageVar = `etage_${kabine.currentEtage}`;
+        const etageLine = `kabine_${id}_etage = ${etageVar}`;
+
+        return `${etageLine}\n${tuerLine}`;
+    });
+
+    return lines.join('\n\n');
 }

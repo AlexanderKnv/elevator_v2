@@ -17,4 +17,3 @@ export function parseImperativEtagenCode(code: string): number[] {
 
     return etagen;
 }
-

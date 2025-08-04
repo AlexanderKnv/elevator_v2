@@ -20,6 +20,3 @@ export function parseOopEtagenCode(code: string): number[] {
 
     return Array.from(etagen).sort((a, b) => a - b);
 }
-
-
-

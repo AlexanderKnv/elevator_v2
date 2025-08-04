@@ -1,36 +1,56 @@
 import type { Kabine } from "../../../../store/kabineSlice";
 
 export function parseOopKabinenCode(code: string): Kabine[] {
-    const lines = code
+    const allLines = code
         .split('\n')
-        .map((l) => l.trim())
-        .filter((l) =>
-            l.startsWith('kabine_') && l.includes('Kabine(')
-        );
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+
+    const etageVarMap = new Map<string, number>();
+    for (let i = 0; i < allLines.length; i++) {
+        const line = allLines[i];
+        const match = line.match(/^etage_(\d+)\s*=\s*Etage\(\s*(\d+)\s*\)$/);
+        if (match) {
+            const varName = `etage_${match[1]}`;
+            const nr = parseInt(match[2], 10);
+            etageVarMap.set(varName, nr);
+        }
+    }
 
     const kabinen: Kabine[] = [];
-
-    lines.forEach((line) => {
+    for (let i = 0; i < allLines.length; i++) {
+        const line = allLines[i];
         const match = line.match(
-            /^kabine_(\d+)\s*=\s*Kabine\((\d+),\s*(\d+),\s*tuer_offen\s*=\s*(true|false)\)$/i
+            /^kabine_(\d+)\s*=\s*Kabine\(\s*\d+\s*,\s*(\d+|etage_\d+)\s*,\s*tuer_offen\s*=\s*(true|false)\s*\)$/
         );
-        if (!match) {
-            throw new Error(
-                `Ungültige Kabine in Zeile: "${line}". Erwartet: kabine_<n> = Kabine(id, etage, tuer_offen=true|false)`
-            );
+
+        if (!match) continue;
+
+        const id = match[1];
+        const etageRaw = match[2];
+        const tuerRaw = match[3];
+
+        let currentEtage: number | undefined;
+
+        if (/^\d+$/.test(etageRaw)) {
+            currentEtage = parseInt(etageRaw, 10);
+        } else {
+            currentEtage = etageVarMap.get(etageRaw);
+            if (currentEtage === undefined) {
+                throw new Error(
+                    `Unbekannte Etagenvariable "${etageRaw}" in Zeile ${i + 1}`
+                );
+            }
         }
-        //@ts-ignore
-        const [, idRaw, id, etage, tuerRaw] = match;
+
+        const doorsOpen = tuerRaw.toLowerCase() === 'true';
 
         kabinen.push({
-            id: `kabine-${idRaw}`,
-            currentEtage: parseInt(etage, 10),
-            doorsOpen: tuerRaw.toLowerCase() === 'true',
+            id: `kabine-${id}`,
+            currentEtage,
+            doorsOpen,
         });
-    });
+    }
 
     return kabinen;
 }
-
-
-

@@ -1,25 +1,51 @@
 import type { Kabine } from "../../../../store/kabineSlice";
 
 export function parseImperativKabinenCode(code: string): Kabine[] {
-    const lines = code
+    const allLines = code
         .split('\n')
         .map((l) => l.trim())
-        .filter((l) => l.startsWith('kabine_'));
+        .filter((l) => l.length > 0);
+
+    const etageVarMap = new Map<string, number>();
+
+    allLines.forEach((line) => {
+        const match = line.match(/^etage_(\d+)\s*=\s*(\d+)$/);
+        if (match) {
+            const name = `etage_${match[1]}`;
+            const nr = parseInt(match[2], 10);
+            etageVarMap.set(name, nr);
+        }
+    });
+
+    const kabinenLines = allLines.filter((l) => l.startsWith('kabine_'));
 
     const kabinenMap = new Map<
         string,
         { currentEtage?: number; doorsOpen?: boolean; originalLines: string[] }
     >();
 
-    lines.forEach((line) => {
-        const etageMatch = line.match(/^kabine_(\d+)_etage\s*=\s*(\d+)$/);
+    kabinenLines.forEach((line) => {
+        const etageMatch = line.match(/^kabine_(\d+)_etage\s*=\s*(\d+|etage_\d+)$/);
         const tuerMatch = line.match(/^kabine_(\d+)_tuer_offen\s*=\s*(true|false)$/i);
 
         if (etageMatch) {
             const id = etageMatch[1];
-            const etage = parseInt(etageMatch[2], 10);
+            const rawEtage = etageMatch[2];
+            let etageNum: number | undefined;
+
+            if (/^\d+$/.test(rawEtage)) {
+                etageNum = parseInt(rawEtage, 10);
+            } else {
+                etageNum = etageVarMap.get(rawEtage);
+                if (etageNum === undefined) {
+                    throw new Error(
+                        `Unbekannte Etagenvariable "${rawEtage}"`
+                    );
+                }
+            }
+
             const existing = kabinenMap.get(id) || { originalLines: [] };
-            existing.currentEtage = etage;
+            existing.currentEtage = etageNum;
             existing.originalLines.push(line);
             kabinenMap.set(id, existing);
             return;
@@ -41,7 +67,6 @@ export function parseImperativKabinenCode(code: string): Kabine[] {
     });
 
     const kabinen: Kabine[] = [];
-
     for (const [id, data] of kabinenMap.entries()) {
         if (data.currentEtage === undefined || data.doorsOpen === undefined) {
             throw new Error(
@@ -58,5 +83,3 @@ export function parseImperativKabinenCode(code: string): Kabine[] {
 
     return kabinen;
 }
-
-
