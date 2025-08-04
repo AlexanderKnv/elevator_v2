@@ -1,7 +1,6 @@
 import React from 'react';
 import './EtageItem.css';
 import EtagenImage from '../../../assets/Etagen.jpg';
-import TooltipWrapper from '../../Shared/TooltipWrapper/TooltipWrapper';
 import { useDrag } from 'react-dnd';
 
 const EtageItem: React.FC = () => {
@@ -14,19 +13,16 @@ const EtageItem: React.FC = () => {
     }));
 
     return (
-        <TooltipWrapper
-            dragRef={dragRef}
+        <div
+            className="etage-item"
+            //@ts-ignore
+            ref={dragRef}
             isDragging={isDragging}
-            tooltipContent={<img src={EtagenImage} alt="Etage Vorschau" />}
+            style={{ opacity: isDragging ? 0.5 : 1 }}
         >
-            <div
-                className="etage-item"
-                style={{ opacity: isDragging ? 0.5 : 1 }}
-            >
-                <div className="etage-icon">🏢</div>
-                <div className="etage-label">Etage</div>
-            </div>
-        </TooltipWrapper>
+            <img src={EtagenImage} alt="Etage" className="etage-image" />
+            <div className="etage-label">Etage</div>
+        </div>
     );
 };
 

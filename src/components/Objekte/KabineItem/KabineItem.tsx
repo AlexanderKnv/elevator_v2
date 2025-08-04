@@ -1,7 +1,6 @@
 import React from 'react';
 import './KabineItem.css';
 import KabineImage from '../../../assets/Kabine.png';
-import TooltipWrapper from '../../Shared/TooltipWrapper/TooltipWrapper';
 import { useDrag } from 'react-dnd';
 
 const KabineItem: React.FC = () => {
@@ -14,19 +13,16 @@ const KabineItem: React.FC = () => {
     }));
 
     return (
-        <TooltipWrapper
-            dragRef={dragRef}
+        <div
+            className="kabine-item"
+            //@ts-ignore
+            ref={dragRef}
             isDragging={isDragging}
-            tooltipContent={<img src={KabineImage} alt="Kabine Vorschau" />}
+            style={{ opacity: isDragging ? 0.5 : 1 }}
         >
-            <div
-                className="kabine-item"
-                style={{ opacity: isDragging ? 0.5 : 1 }}
-            >
-                <div className="kabine-icon">🛗</div>
-                <div className="kabine-label">Kabine</div>
-            </div>
-        </TooltipWrapper>
+            <img src={KabineImage} alt="Kabine" className="kabine-image" />
+            <div className="kabine-label">Kabine</div>
+        </div>
     );
 };
 

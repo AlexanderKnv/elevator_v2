@@ -1,24 +1,31 @@
 .kabine-item {
-    background-color: #3a3a3a;
-    border: 1px solid #555;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #2a2a2a;
+    padding: 10px;
     border-radius: 8px;
-    padding: 6px 0;
-    width: 70px;
-    margin: 8px;
-    text-align: center;
+    margin-bottom: 12px;
     cursor: grab;
-    transition: background-color 0.2s;
+    transition: transform 0.2s ease;
+    border: 1px solid #555;
 }
 
 .kabine-item:hover {
-    background-color: #4a4a4a;
+    transform: scale(1.05);
+    background-color: #333;
 }
 
-.kabine-icon {
-    font-size: 24px;
-    margin-bottom: 5px;
+.kabine-image {
+    width: 235px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 6px;
 }
 
 .kabine-label {
     font-size: 14px;
+    color: #f0f0f0;
+    text-align: center;
 }

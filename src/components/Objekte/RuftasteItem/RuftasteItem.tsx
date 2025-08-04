@@ -1,7 +1,6 @@
 import './RuftasteItem.css';
 import { useDrag } from 'react-dnd';
 import RuftasteImage from '../../../assets/Ruftaste.jpg';
-import TooltipWrapper from '../../Shared/TooltipWrapper/TooltipWrapper';
 
 const RuftasteItem: React.FC = () => {
     const [{ isDragging }, dragRef] = useDrag(() => ({
@@ -12,18 +11,16 @@ const RuftasteItem: React.FC = () => {
     }));
 
     return (
-        <TooltipWrapper
-            dragRef={dragRef}
+        <div
+            //@ts-ignore
+            ref={dragRef}
             isDragging={isDragging}
-            tooltipContent={<img src={RuftasteImage} alt="Ruftaste Vorschau" />}>
-            <div
-                className="ruftaste-item"
-                style={{ opacity: isDragging ? 0.5 : 1 }}
-            >
-                <div className="ruftaste-icon">🔘</div>
-                <div className="ruftaste-label">Ruftaste</div>
-            </div>
-        </TooltipWrapper>
+            className="ruftaste-item"
+            style={{ opacity: isDragging ? 0.5 : 1 }}
+        >
+            <img src={RuftasteImage} alt="Ruftaste" className="ruftaste-image" />
+            <div className="ruftaste-label">Ruftaste</div>
+        </div>
     );
 };
 
