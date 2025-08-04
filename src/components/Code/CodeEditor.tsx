@@ -30,7 +30,8 @@ export default function CodeEditor() {
             dispatch(resetEtagen(parsedEtagen));
             dispatch(resetKabinen(parsedKabinen));
         } catch (err) {
-            setErrorMessage('Fehler beim Parsen des Codes. Bitte Syntax überprüfen.');
+            //@ts-ignore
+            setErrorMessage(err.message);
         }
     };
 

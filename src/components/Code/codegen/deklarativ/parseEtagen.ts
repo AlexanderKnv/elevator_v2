@@ -1,12 +1,28 @@
 export function parseDeklarativEtagenCode(code: string): number[] {
-    const etagenMatch = code.match(/etagen\s*=\s*\[(.*?)\]/s);
-    if (!etagenMatch) throw new Error("etagen = [...] nicht gefunden");
+    const blockMatch = code.match(/etagen\s*=\s*\[(.*?)\]/s);
+    if (!blockMatch) {
+        throw new Error('Block "etagen = [...]" nicht gefunden.');
+    }
+    const inner = blockMatch[1];
+    const lines = inner
+        .split('\n')
+        .map((l) => l.trim())
+        .filter((l) => l.length > 0);
 
-    const inner = etagenMatch[1];
-    const matches = [...inner.matchAll(/"nr":\s*(\d+)/g)];
+    if (lines.length === 0) {
+        return [];
+    }
 
-    if (matches.length === 0) throw new Error("Keine gültige Etagen gefunden");
+    const etagen: number[] = [];
+    lines.forEach((line) => {
+        const m = line.match(/^\{\s*"nr"\s*:\s*(\d+)\s*\},?$/);
+        if (!m) {
+            throw new Error(
+                `Ungültige Etage in Zeile: "${line}". Erwartet: { "nr": <Zahl> }`
+            );
+        }
+        etagen.push(parseInt(m[1], 10));
+    });
 
-    return matches.map((m) => parseInt(m[1], 10));
+    return etagen;
 }
-
