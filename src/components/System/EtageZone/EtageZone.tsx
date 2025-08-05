@@ -55,6 +55,3 @@ const EtageZone: React.FC = () => {
 };
 
 export default EtageZone;
-
-
-// console.log('Текущий массив:', JSON.parse(JSON.stringify(state.etagen)));

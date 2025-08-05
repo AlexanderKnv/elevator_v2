@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDrop } from 'react-dnd';
 import { useDispatch, useSelector } from 'react-redux';
 import { addKabine } from '../../../store/kabineSlice';
 import { type AppDispatch, type RootState } from '../../../store/store';
-import { addRuftasteToEtage } from '../../../store/ruftasteSlice';
+import { activateRuftaste, addRuftasteToEtage } from '../../../store/ruftasteSlice';
 import { moveKabineToEtage } from '../KabinenZone/kabineThunks';
 
 interface EtageVisualProps {
@@ -13,6 +13,13 @@ interface EtageVisualProps {
 const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
     const dispatch = useDispatch<AppDispatch>();
     const allEtagen = useSelector((state: RootState) => state.etage.etagen);
+    const kabine = useSelector((state: RootState) => state.kabine.kabinen[0]);
+
+    const aktiveRuftasten = useSelector((state: RootState) => state.ruftaste.aktiveRuftasten);
+    const isActive = (richtung: 'up' | 'down') =>
+        aktiveRuftasten.some(
+            (entry) => entry.etage === etageNumber && entry.richtung === richtung
+        );
 
     const lowestEtage = Math.min(...allEtagen);
     const highestEtage = Math.max(...allEtagen);
@@ -20,6 +27,17 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
     const ruftasteAktiv = useSelector((state: RootState) =>
         state.ruftaste.etagenMitRuftasten.includes(etageNumber)
     );
+
+    const handleClick = (richtung: 'up' | 'down') => {
+        if (kabine.currentEtage !== etageNumber) {
+            dispatch(activateRuftaste({ etage: etageNumber, richtung }));
+        }
+        dispatch(moveKabineToEtage(etageNumber));
+    };
+
+    useEffect(() => {
+        console.log('aktiveRuftasten изменилось:', aktiveRuftasten);
+    }, [aktiveRuftasten]);
 
     const [{ isOver }, dropRef] = useDrop(() => ({
         accept: ['KABINE', 'RUFTASTE'],
@@ -42,30 +60,44 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
         //@ts-ignore
         <div ref={dropRef} className="etage-visual" style={{ position: 'relative' }}>
             <div className="etageCircle">{etageNumber}</div>
-            <div className="inner-zone">
-                {isOver && (
-                    <div
-                        className="overlay-kabine"
-                        style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            backgroundColor: 'rgba(0, 0, 255, 0.1)',
-                            zIndex: 1,
-                        }}
-                    >
-                    </div>
-                )}
 
-                {ruftasteAktiv && (
-                    <div className="ruf-buttons">
-                        {etageNumber !== highestEtage && <button onClick={() => dispatch(moveKabineToEtage(etageNumber))}>⬆️</button>}
-                        {etageNumber !== lowestEtage && <button onClick={() => dispatch(moveKabineToEtage(etageNumber))}>⬇️</button>}
-                    </div>
-                )}
-            </div>
+            {isOver && (
+                <div
+                    className="overlay-kabine"
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                        zIndex: 1,
+                    }}
+                >
+                </div>
+            )}
+
+            {ruftasteAktiv && (
+                <div className="ruf-buttons">
+                    {etageNumber !== highestEtage && (
+                        <button
+                            className={`ruf-button up ${isActive('up') ? 'active' : ''}`}
+                            onClick={() => handleClick('up')}
+                        >
+                            ⬆️
+                        </button>
+                    )}
+                    {etageNumber !== lowestEtage && (
+                        <button
+                            className={`ruf-button down ${isActive('down') ? 'active' : ''}`}
+                            onClick={() => handleClick('down')}
+                        >
+                            ⬇️
+                        </button>
+                    )}
+                </div>
+            )}
+
         </div>
     );
 };

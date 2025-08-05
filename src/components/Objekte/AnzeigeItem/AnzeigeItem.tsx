@@ -17,7 +17,6 @@ const AnzeigeItem: React.FC = () => {
             className="anzeige-item"
             //@ts-ignore
             ref={dragRef}
-            isDragging={isDragging}
             style={{ opacity: isDragging ? 0.5 : 1 }}
         >
             <img src={AnzeigeImage} alt="Anzeige" className="anzeige-image" />

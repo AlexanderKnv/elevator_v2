@@ -17,7 +17,6 @@ const KabineItem: React.FC = () => {
             className="kabine-item"
             //@ts-ignore
             ref={dragRef}
-            isDragging={isDragging}
             style={{ opacity: isDragging ? 0.5 : 1 }}
         >
             <img src={KabineImage} alt="Kabine" className="kabine-image" />

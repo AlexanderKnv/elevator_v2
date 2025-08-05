@@ -14,7 +14,6 @@ const RuftasteItem: React.FC = () => {
         <div
             //@ts-ignore
             ref={dragRef}
-            isDragging={isDragging}
             className="ruftaste-item"
             style={{ opacity: isDragging ? 0.5 : 1 }}
         >
