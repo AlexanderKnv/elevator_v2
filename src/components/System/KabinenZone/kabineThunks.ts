@@ -7,10 +7,8 @@ export const moveKabineToEtage = (etage: number) => (dispatch: AppDispatch, getS
 
     if (!kabine) return;
 
-    // Добавляем вызов в очередь
     dispatch(addCallToQueue(etage));
-    // console.log(kabine)
-    // Если кабина уже едет или открывает двери — ничего не делаем
+
     if (kabine.isMoving || kabine.doorsOpen) return;
 
     dispatch(processNextCall());

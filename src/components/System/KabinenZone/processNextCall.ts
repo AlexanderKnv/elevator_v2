@@ -1,4 +1,4 @@
-import { completeMovement, openDoors, removeCallFromQueue, setTargetEtage } from "../../../store/kabineSlice";
+import { completeMovement, openDoors, removeCallFromQueue, setRichtung, setTargetEtage } from "../../../store/kabineSlice";
 import { deactivateRuftaste } from "../../../store/ruftasteSlice";
 import type { AppDispatch } from "../../../store/store";
 
@@ -8,10 +8,30 @@ export const processNextCall = () => (dispatch: AppDispatch, getState: () => any
 
     if (!kabine || kabine.isMoving || !kabine.callQueue || kabine.callQueue.length === 0) return;
 
-    const nextEtage = kabine.callQueue[0];
+    const currentEtage = kabine.currentEtage;
+    const queue = kabine.callQueue;
 
+    let richtung = kabine.richtung;
+    if (!richtung) {
+        const nextEtage = queue[0];
+        richtung = nextEtage > currentEtage ? 'up' : 'down';
+        dispatch(setRichtung(richtung));
+    }
 
-    // Если уже на нужном этаже — просто открываем двери
+    const filteredQueue = queue
+        .filter((etage: number) =>
+            richtung === 'up' ? etage > currentEtage : etage < currentEtage
+        )
+        .sort((a: number, b: number) => (richtung === 'up' ? a - b : b - a));
+
+    if (filteredQueue.length === 0) {
+        dispatch(setRichtung(richtung === 'up' ? 'down' : 'up'));
+        dispatch(processNextCall());
+        return;
+    }
+
+    const nextEtage = filteredQueue[0];
+
     if (kabine.currentEtage === nextEtage) {
         dispatch(openDoors());
         setTimeout(() => {
@@ -22,7 +42,6 @@ export const processNextCall = () => (dispatch: AppDispatch, getState: () => any
         return;
     }
 
-    // Двигаемся к нужному этажу
     dispatch(setTargetEtage(nextEtage));
 
     const travelDuration = Math.abs(kabine.currentEtage - nextEtage) * 5000;
@@ -37,11 +56,8 @@ export const processNextCall = () => (dispatch: AppDispatch, getState: () => any
 
         dispatch(removeCallFromQueue(nextEtage));
 
-        // Запускаем обработку следующего вызова
         setTimeout(() => {
             dispatch(processNextCall());
-        }, 15000); // Подождав пока двери закроются
+        }, 15000);
     }, travelDuration);
 };
-
-
