@@ -7,14 +7,14 @@
     display: flex;
     overflow: hidden;
     z-index: 10;
-    transition: top 3s ease;
+    transition: top 5s ease;
     margin-top: 55px;
 }
 
 .door {
     width: 50%;
     background-color: #ccc;
-    transition: transform 3s ease-in-out;
+    transition: transform 5s ease-in-out;
 }
 
 .door.left {

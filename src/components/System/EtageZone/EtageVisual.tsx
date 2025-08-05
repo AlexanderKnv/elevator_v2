@@ -1,18 +1,38 @@
 import React from 'react';
 import { useDrop } from 'react-dnd';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addKabine } from '../../../store/kabineSlice';
+import { type AppDispatch, type RootState } from '../../../store/store';
+import { addRuftasteToEtage } from '../../../store/ruftasteSlice';
+import { moveKabineToEtage } from '../KabinenZone/kabineThunks';
 
 interface EtageVisualProps {
     etageNumber: number;
 }
 
 const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
+    const allEtagen = useSelector((state: RootState) => state.etage.etagen);
 
-    const [{ isOver }, dropRefKabine] = useDrop(() => ({
-        accept: 'KABINE',
-        drop: () => dispatch(addKabine({ etage: 1 })),
+    const lowestEtage = Math.min(...allEtagen);
+    const highestEtage = Math.max(...allEtagen);
+
+    const ruftasteAktiv = useSelector((state: RootState) =>
+        state.ruftaste.etagenMitRuftasten.includes(etageNumber)
+    );
+
+    const [{ isOver }, dropRef] = useDrop(() => ({
+        accept: ['KABINE', 'RUFTASTE'],
+        //@ts-ignore
+        drop: (item, monitor) => {
+            const type = monitor.getItemType();
+            if (type === 'KABINE') {
+                dispatch(addKabine({ etage: 1 }));
+            }
+            if (type === 'RUFTASTE') {
+                dispatch(addRuftasteToEtage(etageNumber));
+            }
+        },
         collect: (monitor) => ({
             isOver: monitor.isOver(),
         }),
@@ -20,7 +40,7 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
 
     return (
         //@ts-ignore
-        <div ref={dropRefKabine} className="etage-visual" style={{ position: 'relative' }}>
+        <div ref={dropRef} className="etage-visual" style={{ position: 'relative' }}>
             <div className="etageCircle">{etageNumber}</div>
             <div className="inner-zone">
                 {isOver && (
@@ -32,10 +52,17 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                            backgroundColor: 'rgba(0, 0, 255, 0.1)',
                             zIndex: 1,
                         }}
                     >
+                    </div>
+                )}
+
+                {ruftasteAktiv && (
+                    <div className="ruf-buttons">
+                        {etageNumber !== highestEtage && <button onClick={() => dispatch(moveKabineToEtage(etageNumber))}>⬆️</button>}
+                        {etageNumber !== lowestEtage && <button onClick={() => dispatch(moveKabineToEtage(etageNumber))}>⬇️</button>}
                     </div>
                 )}
             </div>

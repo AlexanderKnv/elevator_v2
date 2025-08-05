@@ -8,13 +8,22 @@ const KabinenZone: React.FC = () => {
     const totalEtagen = useSelector((state: RootState) => state.etage.etagen.length);
 
     if (!kabine || totalEtagen === 0) return null;
-    const top = (3 - kabine.currentEtage) * (100 / 3);
+    let top = (3 - kabine.currentEtage) * (100 / 3);
+
+    if (kabine.targetEtage) {
+        top = (3 - kabine.targetEtage) * (100 / 3);
+    }
+
+    const travelDuration = kabine?.targetEtage != null
+        ? Math.abs(kabine.currentEtage - kabine.targetEtage) * 5
+        : 0;
 
     return (
         <div
             className="lift-cabin"
             style={{
                 top: `${top}%`,
+                transition: `top ${travelDuration}s ease-in-out`,
             }}
         >
             <div className={`door left ${kabine.doorsOpen ? 'open' : ''}`} />

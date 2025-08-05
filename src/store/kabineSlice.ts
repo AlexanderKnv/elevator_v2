@@ -4,6 +4,8 @@ export interface Kabine {
     id: string;
     currentEtage: number;
     doorsOpen: boolean;
+    targetEtage: number | null;
+    isMoving: boolean;
 }
 
 interface KabineState {
@@ -24,7 +26,28 @@ const kabineSlice = createSlice({
                 id: nextId,
                 currentEtage: action.payload.etage,
                 doorsOpen: false,
+                targetEtage: null,
+                isMoving: false,
             });
+        },
+        setTargetEtage: (state, action: PayloadAction<number>) => {
+            const kabine = state.kabinen[0];
+            if (!kabine || kabine.isMoving) return;
+            kabine.targetEtage = action.payload;
+            kabine.isMoving = true;
+            kabine.doorsOpen = false;
+        },
+        completeMovement: (state) => {
+            const kabine = state.kabinen[0];
+            if (!kabine || kabine.targetEtage === null) return;
+            kabine.currentEtage = kabine.targetEtage;
+            kabine.targetEtage = null;
+            kabine.isMoving = false;
+        },
+        openDoors: (state) => {
+            const kabine = state.kabinen[0];
+            if (!kabine) return;
+            kabine.doorsOpen = !kabine.doorsOpen;
         },
         resetKabinen: (state, action: PayloadAction<Kabine[]>) => {
             state.kabinen = action.payload;
@@ -32,6 +55,6 @@ const kabineSlice = createSlice({
     },
 });
 
-export const { addKabine, resetKabinen } = kabineSlice.actions;
+export const { addKabine, resetKabinen, setTargetEtage, completeMovement, openDoors } = kabineSlice.actions;
 export default kabineSlice.reducer;
 
