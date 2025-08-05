@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useDrop } from 'react-dnd';
 import { useDispatch, useSelector } from 'react-redux';
 import { addKabine } from '../../../store/kabineSlice';
@@ -32,12 +32,11 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
         if (kabine.currentEtage !== etageNumber) {
             dispatch(activateRuftaste({ etage: etageNumber, richtung }));
         }
+        if (kabine.currentEtage === etageNumber && kabine.isMoving === true) {
+            dispatch(activateRuftaste({ etage: etageNumber, richtung }));
+        }
         dispatch(moveKabineToEtage(etageNumber));
     };
-
-    useEffect(() => {
-        console.log('aktiveRuftasten изменилось:', aktiveRuftasten);
-    }, [aktiveRuftasten]);
 
     const [{ isOver }, dropRef] = useDrop(() => ({
         accept: ['KABINE', 'RUFTASTE'],
