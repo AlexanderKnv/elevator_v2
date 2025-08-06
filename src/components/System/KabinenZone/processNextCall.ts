@@ -22,6 +22,7 @@ export const processNextCall = () => (dispatch: AppDispatch, getState: () => any
         setTimeout(() => {
             dispatch(setDoorsState('closed'));
             dispatch(removeCallFromQueue(currentEtage));
+            dispatch(processNextCall());
         }, 13000);
 
         return;
@@ -35,11 +36,21 @@ export const processNextCall = () => (dispatch: AppDispatch, getState: () => any
         dispatch(setRichtung(richtung));
     }
 
+    const aktiveRuftasten = state.ruftaste.aktiveRuftasten;
+
     const filteredQueue = queue
-        .filter((etage: number) =>
-            richtung === 'up' ? etage > currentEtage : etage < currentEtage
-        )
-        .sort((a: number, b: number) => (richtung === 'up' ? a - b : b - a));
+        .filter((etage: number) => {
+            //@ts-ignore
+            const ruftaste = aktiveRuftasten.find(rt => rt.etage === etage);
+            if (!ruftaste) {
+                return true;
+            }
+            return ruftaste.richtung === richtung;
+        })
+        //@ts-ignore
+
+        .sort((a, b) => (richtung === 'up' ? a - b : b - a));
+
 
     if (filteredQueue.length === 0) {
         dispatch(setRichtung(richtung === 'up' ? 'down' : 'up'));
