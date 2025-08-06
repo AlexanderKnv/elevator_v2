@@ -32,7 +32,6 @@ export const ruftasteSlice = createSlice({
                 state.aktiveRuftasten.push(action.payload);
             }
         },
-
         deactivateRuftaste: (
             state,
             action: PayloadAction<{ etage: number; richtung: Richtung }>
