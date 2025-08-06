@@ -8,6 +8,8 @@ export interface Kabine {
     isMoving: boolean;
     callQueue: number[];
     richtung: 'up' | 'down' | null;
+    hasBedienpanel: boolean;
+    aktiveZielEtagen: number[];
 }
 
 interface KabineState {
@@ -32,6 +34,8 @@ const kabineSlice = createSlice({
                 isMoving: false,
                 callQueue: [],
                 richtung: null,
+                hasBedienpanel: false,
+                aktiveZielEtagen: [],
             });
         },
         setTargetEtage: (state, action: PayloadAction<number>) => {
@@ -74,6 +78,21 @@ const kabineSlice = createSlice({
         resetKabinen: (state, action: PayloadAction<Kabine[]>) => {
             state.kabinen = action.payload;
         },
+        addZielEtage: (state, action: PayloadAction<number>) => {
+            if (!state.kabinen[0].aktiveZielEtagen.includes(action.payload)) {
+                state.kabinen[0].aktiveZielEtagen.push(action.payload);
+            }
+        },
+        removeZielEtage: (state, action: PayloadAction<number>) => {
+            state.kabinen[0].aktiveZielEtagen = state.kabinen[0].aktiveZielEtagen.filter(
+                (etage) => etage !== action.payload
+            );
+        },
+        addBedienpanelToKabine: (state) => {
+            if (state.kabinen[0]) {
+                state.kabinen[0].hasBedienpanel = true;
+            }
+        }
     },
 });
 
@@ -85,7 +104,10 @@ export const {
     openDoors,
     addCallToQueue,
     removeCallFromQueue,
-    setRichtung
+    setRichtung,
+    addBedienpanelToKabine,
+    addZielEtage,
+    removeZielEtage
 } = kabineSlice.actions;
 export default kabineSlice.reducer;
 

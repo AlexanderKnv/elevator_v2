@@ -1,4 +1,4 @@
-import { completeMovement, openDoors, removeCallFromQueue, setRichtung, setTargetEtage } from "../../../store/kabineSlice";
+import { completeMovement, openDoors, removeCallFromQueue, removeZielEtage, setRichtung, setTargetEtage } from "../../../store/kabineSlice";
 import { deactivateRuftaste } from "../../../store/ruftasteSlice";
 import type { AppDispatch } from "../../../store/store";
 
@@ -50,6 +50,7 @@ export const processNextCall = () => (dispatch: AppDispatch, getState: () => any
         dispatch(completeMovement());
         dispatch(deactivateRuftaste({ etage: nextEtage, richtung: 'up' }));
         dispatch(deactivateRuftaste({ etage: nextEtage, richtung: 'down' }));
+        dispatch(removeZielEtage(nextEtage));
 
         setTimeout(() => dispatch(openDoors()), 1000);
         setTimeout(() => dispatch(openDoors()), 9000);
