@@ -7,6 +7,7 @@ export const processNextCall = () => (dispatch: AppDispatch, getState: () => any
     const kabine = state.kabine.kabinen[0];
 
     if (!kabine || kabine.isMoving || !kabine.callQueue || kabine.callQueue.length === 0) return;
+
     const currentEtage = kabine.currentEtage;
     const queue = kabine.callQueue;
 
@@ -22,14 +23,19 @@ export const processNextCall = () => (dispatch: AppDispatch, getState: () => any
         setTimeout(() => {
             dispatch(setDoorsState('closed'));
             dispatch(removeCallFromQueue(currentEtage));
-            dispatch(processNextCall());
+
+            const updatedQueue = getState().kabine.kabinen[0].callQueue;
+            if (updatedQueue.length > 0) {
+                dispatch(processNextCall());
+            } else {
+                dispatch(setRichtung(null));
+            }
         }, 13000);
 
         return;
     }
 
     let richtung = kabine.richtung;
-
     if (!richtung) {
         const nextEtage = queue[0];
         richtung = nextEtage > currentEtage ? 'up' : 'down';
@@ -42,15 +48,11 @@ export const processNextCall = () => (dispatch: AppDispatch, getState: () => any
         .filter((etage: number) => {
             //@ts-ignore
             const ruftaste = aktiveRuftasten.find(rt => rt.etage === etage);
-            if (!ruftaste) {
-                return true;
-            }
+            if (!ruftaste) return true;
             return ruftaste.richtung === richtung;
         })
         //@ts-ignore
-
         .sort((a, b) => (richtung === 'up' ? a - b : b - a));
-
 
     if (filteredQueue.length === 0) {
         dispatch(setRichtung(richtung === 'up' ? 'down' : 'up'));
@@ -59,7 +61,6 @@ export const processNextCall = () => (dispatch: AppDispatch, getState: () => any
     }
 
     const nextEtage = filteredQueue[0];
-
     dispatch(setTargetEtage(nextEtage));
 
     const travelDuration = Math.abs(currentEtage - nextEtage) * 5000;
@@ -81,7 +82,13 @@ export const processNextCall = () => (dispatch: AppDispatch, getState: () => any
         setTimeout(() => {
             dispatch(setDoorsState('closed'));
             dispatch(removeCallFromQueue(nextEtage));
-            dispatch(processNextCall());
+
+            const updatedQueue = getState().kabine.kabinen[0].callQueue;
+            if (updatedQueue.length > 0) {
+                dispatch(processNextCall());
+            } else {
+                dispatch(setRichtung(null));
+            }
         }, 13000);
     }, travelDuration);
 };

@@ -13,6 +13,6 @@ createRoot(document.getElementById('root')!).render(
             <DndProvider backend={HTML5Backend}>
                 <App />
             </DndProvider>
-        </Provider>
+        </Provider>,
     </StrictMode>,
 )
