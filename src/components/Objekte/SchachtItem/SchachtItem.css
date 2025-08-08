@@ -1,0 +1,31 @@
+.schacht-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #2a2a2a;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    cursor: grab;
+    transition: transform 0.2s ease;
+    border: 1px solid #555;
+}
+
+.schacht-item:hover {
+    transform: scale(1.05);
+    background-color: #333;
+}
+
+.schacht-image {
+    width: 235px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 6px;
+}
+
+.schacht-label {
+    font-size: 14px;
+    color: #f0f0f0;
+    text-align: center;
+}

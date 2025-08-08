@@ -5,6 +5,8 @@ import { addKabine } from '../../../store/kabineSlice';
 import { type AppDispatch, type RootState } from '../../../store/store';
 import { activateRuftaste, addRuftasteToEtage } from '../../../store/ruftasteSlice';
 import { moveKabineToEtage } from '../KabinenZone/kabineThunks';
+import { addSchachtToEtage } from '../../../store/schachtSlice';
+import SchachtZone from '../SchachtZone/SchachtZone';
 
 interface EtageVisualProps {
     etageNumber: number;
@@ -14,8 +16,10 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
     const dispatch = useDispatch<AppDispatch>();
     const allEtagen = useSelector((state: RootState) => state.etage.etagen);
     const kabine = useSelector((state: RootState) => state.kabine.kabinen[0]);
-
+    const schachtEtagen = useSelector((state: RootState) => state.schacht.etagenMitSchacht);
     const aktiveRuftasten = useSelector((state: RootState) => state.ruftaste.aktiveRuftasten);
+
+    const hasSchacht = schachtEtagen.includes(etageNumber);
     const isActive = (callDirection: 'up' | 'down') =>
         aktiveRuftasten.some(
             (entry) => entry.etage === etageNumber && entry.callDirection === callDirection
@@ -39,10 +43,8 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
         dispatch(moveKabineToEtage(etageNumber));
     };
 
-
-
     const [{ isOver }, dropRef] = useDrop(() => ({
-        accept: ['KABINE', 'RUFTASTE'],
+        accept: ['KABINE', 'RUFTASTE', 'SCHACHT'],
         //@ts-ignore
         drop: (item, monitor) => {
             const type = monitor.getItemType();
@@ -51,6 +53,9 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
             }
             if (type === 'RUFTASTE') {
                 dispatch(addRuftasteToEtage(etageNumber));
+            }
+            if (type === 'SCHACHT') {
+                dispatch(addSchachtToEtage(etageNumber));
             }
         },
         collect: (monitor) => ({
@@ -99,6 +104,8 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
                     )}
                 </div>
             )}
+
+            {hasSchacht && (<SchachtZone />)}
 
         </div>
     );

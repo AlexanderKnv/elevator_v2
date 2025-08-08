@@ -4,6 +4,7 @@ import KabineItem from '../KabineItem/KabineItem';
 import RuftasteItem from '../RuftasteItem/RuftasteItem';
 import AnzeigeItem from '../AnzeigeItem/AnzeigeItem';
 import BedienpanelItem from '../Bedienpanel/BedienpanelItem';
+import SchachtItem from '../SchachtItem/SchachtItem';
 
 const ObjekteBereich: React.FC = () => {
     return (
@@ -13,6 +14,7 @@ const ObjekteBereich: React.FC = () => {
                 <KabineItem />
                 <BedienpanelItem />
                 <RuftasteItem />
+                <SchachtItem />
                 <AnzeigeItem />
             </div>
         </div>
