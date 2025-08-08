@@ -37,9 +37,9 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
     );
 
     const handleClick = (callDirection: 'up' | 'down') => {
-        if (kabine.currentEtage !== etageNumber) {
-            dispatch(activateRuftaste({ etage: etageNumber, callDirection }));
-        }
+
+        dispatch(activateRuftaste({ etage: etageNumber, callDirection }));
+
         if (kabine.currentEtage === etageNumber && kabine.isMoving === true) {
             dispatch(activateRuftaste({ etage: etageNumber, callDirection }));
         }
