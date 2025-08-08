@@ -4,13 +4,23 @@ import { processNextCall } from './processNextCall';
 
 export const moveKabineToEtage = (etage: number) => (dispatch: AppDispatch, getState: () => any) => {
     const kabine = getState().kabine.kabinen[0];
-    const doorsState = kabine.doorsState;
-
     if (!kabine) return;
+
+    const { doorsState, isMoving, doorsOpen } = kabine;
+
+    // Уже в очереди — ничего не делаем
+
 
     dispatch(addCallToQueue(etage));
 
-    if (kabine.isMoving || kabine.doorsOpen || doorsState === 'opening' || doorsState === 'closing') return;
+    // Если кабина занята — ждём
+    if (isMoving || doorsOpen || doorsState === 'opening' || doorsState === 'closing') return;
+
 
     dispatch(processNextCall());
 };
+
+// console.log(kabine.isMoving)
+// console.log(kabine.doorsOpen)
+// console.log(doorsState === 'opening')
+// console.log(doorsState === 'closing')

@@ -1,10 +1,10 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-type Richtung = 'up' | 'down';
+export type Richtung = 'up' | 'down';
 
 interface RuftasteState {
     etagenMitRuftasten: number[];
-    aktiveRuftasten: { etage: number; richtung: Richtung }[];
+    aktiveRuftasten: { etage: number; callDirection: Richtung }[];
 }
 
 const initialState: RuftasteState = {
@@ -23,10 +23,10 @@ export const ruftasteSlice = createSlice({
         },
         activateRuftaste: (
             state,
-            action: PayloadAction<{ etage: number; richtung: Richtung }>
+            action: PayloadAction<{ etage: number; callDirection: Richtung }>
         ) => {
             const exists = state.aktiveRuftasten.some(
-                (entry) => entry.etage === action.payload.etage && entry.richtung === action.payload.richtung
+                (entry) => entry.etage === action.payload.etage && entry.callDirection === action.payload.callDirection
             );
             if (!exists) {
                 state.aktiveRuftasten.push(action.payload);
@@ -34,10 +34,10 @@ export const ruftasteSlice = createSlice({
         },
         deactivateRuftaste: (
             state,
-            action: PayloadAction<{ etage: number; richtung: Richtung }>
+            action: PayloadAction<{ etage: number; callDirection: Richtung }>
         ) => {
             state.aktiveRuftasten = state.aktiveRuftasten.filter(
-                (entry) => !(entry.etage === action.payload.etage && entry.richtung === action.payload.richtung)
+                (entry) => !(entry.etage === action.payload.etage && entry.callDirection === action.payload.callDirection)
             );
         },
         removeRuftastenForEtage: (state, action: PayloadAction<number>) => {

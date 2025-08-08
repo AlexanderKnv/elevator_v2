@@ -1,8 +1,8 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../../../store/store';
-import { addCallToQueue, addZielEtage, openDoors, } from '../../../store/kabineSlice';
-import Icon from '../../../assets/icon-elevator.png';
+import { addCallToQueue, addZielEtage, } from '../../../store/kabineSlice';
+// import Icon from '../../../assets/icon-elevator.png';
 import './Bedienpanel.css';
 
 const Bedienpanel: React.FC = () => {
@@ -22,9 +22,9 @@ const Bedienpanel: React.FC = () => {
         dispatch(addZielEtage(etage));
     };
 
-    const handleDoorToggle = () => {
-        dispatch(openDoors());
-    };
+    // const handleDoorToggle = () => {
+    //     dispatch(openDoors());
+    // };
 
     return (
         <div className="bedienpanel">
@@ -37,9 +37,9 @@ const Bedienpanel: React.FC = () => {
                     {etage}
                 </button>
             ))}
-            <button onClick={handleDoorToggle} className="bedienpanel-button door-toggle">
+            {/* <button onClick={handleDoorToggle} className="bedienpanel-button door-toggle">
                 <img src={Icon} alt="Icon-elevator" className="elevator-icon" />
-            </button>
+            </button> */}
         </div>
     );
 };

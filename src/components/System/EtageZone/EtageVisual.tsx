@@ -16,9 +16,9 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
     const kabine = useSelector((state: RootState) => state.kabine.kabinen[0]);
 
     const aktiveRuftasten = useSelector((state: RootState) => state.ruftaste.aktiveRuftasten);
-    const isActive = (richtung: 'up' | 'down') =>
+    const isActive = (callDirection: 'up' | 'down') =>
         aktiveRuftasten.some(
-            (entry) => entry.etage === etageNumber && entry.richtung === richtung
+            (entry) => entry.etage === etageNumber && entry.callDirection === callDirection
         );
 
     const lowestEtage = Math.min(...allEtagen);
@@ -28,15 +28,18 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
         state.ruftaste.etagenMitRuftasten.includes(etageNumber)
     );
 
-    const handleClick = (richtung: 'up' | 'down') => {
+    const handleClick = (callDirection: 'up' | 'down') => {
         if (kabine.currentEtage !== etageNumber) {
-            dispatch(activateRuftaste({ etage: etageNumber, richtung }));
+            dispatch(activateRuftaste({ etage: etageNumber, callDirection }));
         }
         if (kabine.currentEtage === etageNumber && kabine.isMoving === true) {
-            dispatch(activateRuftaste({ etage: etageNumber, richtung }));
+            dispatch(activateRuftaste({ etage: etageNumber, callDirection }));
         }
+
         dispatch(moveKabineToEtage(etageNumber));
     };
+
+
 
     const [{ isOver }, dropRef] = useDrop(() => ({
         accept: ['KABINE', 'RUFTASTE'],
