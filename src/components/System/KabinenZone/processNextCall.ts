@@ -1,4 +1,4 @@
-import { completeMovement, openDoors, removeCallFromQueue, removeZielEtage, setDoorsState, setDirectionMovement, setTargetEtage } from "../../../store/kabineSlice";
+import { completeMovement, openDoors, removeCallFromQueue, removeZielEtage, setDoorsState, setDirectionMovement, setTargetEtage, setCurrentEtage } from "../../../store/kabineSlice";
 import { deactivateRuftaste } from "../../../store/ruftasteSlice";
 import type { AppDispatch } from "../../../store/store";
 
@@ -118,11 +118,21 @@ export const processNextCall = () => (dispatch: AppDispatch, getState: () => any
 
     // Едем к следующему кандидату
     const nextEtage = candidates[0];
-    const travelDuration = Math.abs(currentEtage - nextEtage) * 5000;
+
+    let dif = Math.abs(nextEtage - currentEtage);
+    const travelDuration = dif * 5000;
 
     dispatch(setTargetEtage(nextEtage));
 
+    if (Math.abs(dif) > 1) {
+        setTimeout(() => {
+            dispatch(setCurrentEtage(2));
+            dif = 0;
+        }, 5000)
+    }
+
     setTimeout(() => {
+
         dispatch(completeMovement());
 
         // Снимаем требования на этаже прибытия

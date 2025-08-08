@@ -40,6 +40,12 @@ const kabineSlice = createSlice({
                 doorsState: 'closed',
             });
         },
+        setCurrentEtage: (state, action: PayloadAction<number>) => {
+            const kabine = state.kabinen[0];
+            if (kabine) {
+                kabine.currentEtage = action.payload;
+            }
+        },
         setTargetEtage: (state, action: PayloadAction<number>) => {
             const kabine = state.kabinen[0];
             if (!kabine || kabine.isMoving) return;
@@ -118,6 +124,7 @@ export const {
     addZielEtage,
     removeZielEtage,
     setDoorsState,
+    setCurrentEtage,
 } = kabineSlice.actions;
 export default kabineSlice.reducer;
 

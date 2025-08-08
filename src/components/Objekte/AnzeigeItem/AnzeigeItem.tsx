@@ -1,6 +1,6 @@
 import React from 'react';
 import './AnzeigeItem.css';
-import AnzeigeImage from '../../../assets/Anzeige.png';
+import AnzeigeImage from '../../../assets/Anzeige.jpg';
 import { useDrag } from 'react-dnd';
 
 const AnzeigeItem: React.FC = () => {
