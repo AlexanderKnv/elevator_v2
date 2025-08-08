@@ -7,6 +7,8 @@ import { activateRuftaste, addRuftasteToEtage } from '../../../store/ruftasteSli
 import { moveKabineToEtage } from '../KabinenZone/kabineThunks';
 import { addSchachtToEtage } from '../../../store/schachtSlice';
 import SchachtZone from '../SchachtZone/SchachtZone';
+import { addAnzeigeToEtage } from '../../../store/anzeigeSlice ';
+import AnzeigeZone from '../AnzeigeZone/AnzeigeZone';
 
 interface EtageVisualProps {
     etageNumber: number;
@@ -18,7 +20,9 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
     const kabine = useSelector((state: RootState) => state.kabine.kabinen[0]);
     const schachtEtagen = useSelector((state: RootState) => state.schacht.etagenMitSchacht);
     const aktiveRuftasten = useSelector((state: RootState) => state.ruftaste.aktiveRuftasten);
+    const anzeigeEtagen = useSelector((s: RootState) => s.anzeige.etagenMitAnzeige);
 
+    const hasAnzeige = anzeigeEtagen.includes(etageNumber);
     const hasSchacht = schachtEtagen.includes(etageNumber);
     const isActive = (callDirection: 'up' | 'down') =>
         aktiveRuftasten.some(
@@ -44,7 +48,7 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
     };
 
     const [{ isOver }, dropRef] = useDrop(() => ({
-        accept: ['KABINE', 'RUFTASTE', 'SCHACHT'],
+        accept: ['KABINE', 'RUFTASTE', 'SCHACHT', 'ANZEIGE'],
         //@ts-ignore
         drop: (item, monitor) => {
             const type = monitor.getItemType();
@@ -56,6 +60,9 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
             }
             if (type === 'SCHACHT') {
                 dispatch(addSchachtToEtage(etageNumber));
+            }
+            if (type === 'ANZEIGE') {
+                dispatch(addAnzeigeToEtage(etageNumber));
             }
         },
         collect: (monitor) => ({
@@ -105,7 +112,9 @@ const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
                 </div>
             )}
 
-            {hasSchacht && (<SchachtZone />)}
+            {hasSchacht && (<SchachtZone etageNumber={etageNumber} />)}
+
+            {hasAnzeige && <AnzeigeZone />}
 
         </div>
     );

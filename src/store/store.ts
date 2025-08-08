@@ -3,6 +3,7 @@ import etageReducer from './etageSlice';
 import kabineReducer from './kabineSlice';
 import ruftasteReducer from './ruftasteSlice';
 import schachtReducer from './schachtSlice';
+import anzeigeReducer from './anzeigeSlice ';
 
 export const store = configureStore({
     reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
         kabine: kabineReducer,
         ruftaste: ruftasteReducer,
         schacht: schachtReducer,
+        anzeige: anzeigeReducer,
     },
 });
 

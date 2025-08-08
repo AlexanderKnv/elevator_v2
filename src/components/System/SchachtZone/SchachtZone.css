@@ -9,8 +9,7 @@
     margin-top: 8%;
     width: 26%;
     height: 77.2%;
-    left: 7.5%;
-    background-color: #22c959;
+    left: 7.3%;
     display: inline-flex;
     flex-direction: column;
 }
@@ -32,25 +31,37 @@
     background-color: #555;
     border: 2px solid #777;
     flex-shrink: 0;
+    overflow: hidden;
 }
 
-/* Двери */
 .elevator-doors {
     display: flex;
     width: 100%;
     height: 100%;
     background-color: transparent;
+    overflow: hidden;
 }
 
 .door {
     width: 50%;
     height: 100%;
+    transition: transform 5s ease-in-out;
 }
 
 .left-door {
     border-right: 1px solid #999;
+    transform: translateX(0%);
+}
+
+.left-door.open {
+    transform: translateX(-100%);
 }
 
 .right-door {
     border-left: 1px solid #999;
+    transform: translateX(0%);
+}
+
+.right-door.open {
+    transform: translateX(100%);
 }

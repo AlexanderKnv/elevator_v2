@@ -1,0 +1,15 @@
+.anzeige-panel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    margin-top: 8.5%;
+    font-size: 90%;
+    color: #22c959;
+    background-color: black;
+    padding: 1px 0;
+    z-index: 50;
+    width: 14%;
+    left: 13.5%;
+    height: 7%;
+}
