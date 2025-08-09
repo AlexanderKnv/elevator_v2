@@ -8,14 +8,9 @@ export const moveKabineToEtage = (etage: number) => (dispatch: AppDispatch, getS
 
     const { doorsState, isMoving, doorsOpen } = kabine;
 
-    // Уже в очереди — ничего не делаем
-
-
     dispatch(addCallToQueue(etage));
 
-    // Если кабина занята — ждём
     if (isMoving || doorsOpen || doorsState === 'opening' || doorsState === 'closing') return;
-
 
     dispatch(processNextCall());
 };

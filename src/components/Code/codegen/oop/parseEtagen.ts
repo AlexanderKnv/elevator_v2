@@ -1,22 +1,24 @@
 export function parseOopEtagenCode(code: string): number[] {
-    const lines = code
-        .split('\n')
-        .map((l) => l.trim())
-        .filter((l) => l.length > 0 && l.startsWith('etage_'));
+    const re = /^\s*etage_(\d+)\s*=\s*Etage\s*\(\s*(\d+)\s*\)\s*$/gm;
+    const seen: number[] = [];
+    let m: RegExpExecArray | null;
 
-    const etagen = new Set<number>();
+    while ((m = re.exec(code)) !== null) {
+        const varId = parseInt(m[1], 10);
+        const nr = parseInt(m[2], 10);
 
-    lines.forEach((line) => {
-        const match = line.match(/^etage_\d+\s*=\s*Etage\((\d+)\)/);
-
-        if (!match) {
-            throw new Error(
-                `Ungültige Etage in Zeile: "${line}". Erwartet: etage_<id> = Etage(<Zahl>)`
-            );
+        if (varId !== nr) {
+            throw new Error(`Ungültige Etage: etage_${varId} muss Etage(${varId}) sein.`);
         }
+        if (nr < 1 || nr > 3) {
+            throw new Error(`Etage ${nr} liegt außerhalb des Bereichs 1..3.`);
+        }
+        if (seen.includes(nr)) {
+            throw new Error(`Doppelte Etage: ${nr}.`);
+        }
+        seen.push(nr);
+    }
 
-        etagen.add(parseInt(match[1], 10));
-    });
-
-    return Array.from(etagen).sort((a, b) => a - b);
+    // Никаких объявлений — значит этажи пусты (и это не ошибка)
+    return seen.sort((a, b) => a - b);
 }
