@@ -4,4 +4,3 @@ export function generateDeklarativEtagenCode(etagen: number[]): string {
     const list = etagen.map((nr) => `    { "nr": ${nr} }`).join(',\n');
     return `etagen = [\n${list}\n]`;
 }
-

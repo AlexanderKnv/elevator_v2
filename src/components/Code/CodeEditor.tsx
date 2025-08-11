@@ -9,26 +9,37 @@ import { generateCode, type CodeStyle } from './codegen/codegen';
 import { resetEtagen } from '../../store/etageSlice';
 import { resetKabinen } from '../../store/kabineSlice';
 import { parseCode } from './codegen/parse';
+import { resetRuftasten } from '../../store/ruftasteSlice';
+import { resetAnzeige } from '../../store/anzeigeSlice ';
 
 export default function CodeEditor() {
     const etagen = useSelector((state: RootState) => state.etage.etagen);
     const kabinen = useSelector((state: RootState) => state.kabine.kabinen);
+    const ruftasten = useSelector((state: RootState) => state.ruftaste);
+    const anzeigeEtagen = useSelector((state: RootState) => state.anzeige.etagenMitAnzeige);
     const [style, setStyle] = useState<CodeStyle>('Deklarativ');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [code, setCode] = useState('');
     const dispatch = useDispatch();
 
     useEffect(() => {
-        setCode(generateCode(style, etagen, kabinen));
-    }, [style, etagen, kabinen]);
+        setCode(generateCode(style, etagen, kabinen, ruftasten, anzeigeEtagen));
+    }, [style, etagen, kabinen, ruftasten, anzeigeEtagen]);
 
     const handleRun = () => {
         setErrorMessage(null);
         try {
-            const { etagen: parsedEtagen, kabinen: parsedKabinen } = parseCode(style, code);
+            const {
+                etagen: parsedEtagen,
+                kabinen: parsedKabinen,
+                ruftasten: parsedRuftasten,
+                anzeige: parsedAnzeige,
+            } = parseCode(style, code);
 
             dispatch(resetEtagen(parsedEtagen));
             dispatch(resetKabinen(parsedKabinen));
+            dispatch(resetRuftasten(parsedRuftasten));
+            dispatch(resetAnzeige(parsedAnzeige.etagenMitAnzeige));
         } catch (err) {
             //@ts-ignore
             setErrorMessage(err.message);
@@ -61,6 +72,7 @@ export default function CodeEditor() {
                 extensions={[python()]}
                 onChange={(value) => setCode(value)}
                 theme={oneDark}
+                style={{ overflow: 'auto' }}
             />
 
             {errorMessage && (

@@ -1,37 +1,24 @@
 import type { Kabine } from "../../../../store/kabineSlice";
+import { sortKabinenById, getKabineIdNumber } from "../../../../helpers/kabineHelper";
+import { pyBoolTF, etageVar, etageVarOrNone, etageVarArray, pyNoneOrQuoted } from "../../../../helpers/renderHelper";
 
 export function generateOopKabinenCode(kabinen: Kabine[]): string {
     if (!kabinen || kabinen.length === 0) {
         return oopClassDef().trim();
     }
 
-    const toBoolPy = (v: boolean) => (v ? "True" : "False");
-    const etageVar = (n: number) => `etage_${n}`;
-    const toEtageVarOrNone = (v: number | null | undefined) =>
-        v === null || v === undefined || Number.isNaN(v) ? "None" : etageVar(v);
-    const toEtageVarArray = (xs: number[] | undefined) =>
-        `[${(xs ?? []).map((n) => etageVar(n)).join(", ")}]`;
-    const toNoneOrStrPy = (v: string | null | undefined) =>
-        v == null ? "None" : `"${v}"`;
-
-    const sorted = [...kabinen].sort((a, b) => {
-        const aid = parseInt(a.id.split("-")[1] ?? "0", 10);
-        const bid = parseInt(b.id.split("-")[1] ?? "0", 10);
-        return aid - bid;
-    });
-
-    const instances = sorted.map((k) => {
-        const idNum = parseInt(k.id.split("-")[1] ?? "0", 10) || 0;
+    const instances = sortKabinenById(kabinen).map((k) => {
+        const idNum = getKabineIdNumber(k.id);
         const args = [
             `${idNum}`,
             `${etageVar(k.currentEtage)}`,
-            `${toEtageVarOrNone(k.targetEtage)}`,
-            `${toBoolPy(!!k.isMoving)}`,
-            `${toBoolPy(!!k.doorsOpen)}`,
-            `${toEtageVarArray(k.callQueue)}`,
-            `${toNoneOrStrPy(k.directionMovement)}`,
-            `${toBoolPy(!!k.hasBedienpanel)}`,
-            `${toEtageVarArray(k.aktiveZielEtagen)}`
+            `${etageVarOrNone(k.targetEtage)}`,
+            `${pyBoolTF(!!k.isMoving)}`,
+            `${pyBoolTF(!!k.doorsOpen)}`,
+            `${etageVarArray(k.callQueue ?? [])}`,
+            `${pyNoneOrQuoted(k.directionMovement ?? null)}`,
+            `${pyBoolTF(!!k.hasBedienpanel)}`,
+            `${etageVarArray(k.aktiveZielEtagen ?? [])}`,
         ].join(", ");
 
         return `# Kabine ${idNum}\nkabine_${idNum} = Kabine(${args})\n`;
@@ -56,5 +43,3 @@ function oopClassDef(): string {
         `        self.aktive_ziel_etagen = aktive_ziel_etagen`,
     ].join("\n");
 }
-
-

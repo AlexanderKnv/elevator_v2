@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 export type Richtung = 'up' | 'down';
 
-interface RuftasteState {
+export interface RuftasteState {
     etagenMitRuftasten: number[];
     aktiveRuftasten: { etage: number; callDirection: Richtung }[];
 }
@@ -45,6 +45,21 @@ export const ruftasteSlice = createSlice({
                 (nr) => nr !== action.payload
             );
         },
+        resetRuftasten: (
+            state,
+            action: PayloadAction<{
+                etagenMitRuftasten: number[];
+                aktiveRuftasten: { etage: number; callDirection: Richtung }[];
+            }>
+        ) => {
+            state.etagenMitRuftasten = [...action.payload.etagenMitRuftasten].sort((a, b) => a - b);
+            state.aktiveRuftasten = [...action.payload.aktiveRuftasten].sort(
+                (a, b) =>
+                    a.etage - b.etage ||
+                    (a.callDirection === 'up' && b.callDirection === 'down' ? -1 :
+                        a.callDirection === b.callDirection ? 0 : 1)
+            );
+        },
     },
 });
 
@@ -53,5 +68,6 @@ export const {
     activateRuftaste,
     deactivateRuftaste,
     removeRuftastenForEtage,
+    resetRuftasten,
 } = ruftasteSlice.actions;
 export default ruftasteSlice.reducer;

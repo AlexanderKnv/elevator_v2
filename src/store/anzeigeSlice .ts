@@ -21,8 +21,8 @@ const anzeigeSlice = createSlice({
         removeAnzeigeFromEtage: (state, action: PayloadAction<number>) => {
             state.etagenMitAnzeige = state.etagenMitAnzeige.filter(n => n !== action.payload);
         },
-        resetAnzeige: (state) => {
-            state.etagenMitAnzeige = [];
+        resetAnzeige: (state, action: PayloadAction<number[]>) => {
+            state.etagenMitAnzeige = Array.from(new Set(action.payload)).sort((a, b) => a - b);
         },
     },
 });

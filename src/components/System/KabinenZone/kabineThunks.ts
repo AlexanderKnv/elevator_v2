@@ -14,8 +14,3 @@ export const moveKabineToEtage = (etage: number) => (dispatch: AppDispatch, getS
 
     dispatch(processNextCall());
 };
-
-// console.log(kabine.isMoving)
-// console.log(kabine.doorsOpen)
-// console.log(doorsState === 'opening')
-// console.log(doorsState === 'closing')

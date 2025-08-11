@@ -39,5 +39,6 @@ html,
     max-width: 100%;
     padding: 10px;
     background-color: #252525;
-    overflow: auto;
+    overflow: hidden;
+    overflow-y: auto;
 }
