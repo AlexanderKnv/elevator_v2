@@ -15,6 +15,7 @@ export function parseImperativRuftasteCode(code: string): {
             const parts = inner.split(",").map(s => s.trim()).filter(Boolean);
             const etageVarRe = /^etage_(\d+)$/i;
             const seen = new Set<number>();
+            //@ts-ignore
             etagenMitRuftasten = parts.map((p, idx) => {
                 const m = p.match(etageVarRe);
                 if (!m) throw new Error(`ruftasten_etagen: Ungültiger Eintrag "${p}" (erwartet etage_<n>).`);
