@@ -21,6 +21,28 @@ export function extractBracketInner(code: string, startRegex: RegExp, open = "["
     return code.slice(start, end);
 }
 
+export function tryExtractBracketInner(
+    code: string,
+    startRegex: RegExp,
+    open = "[",
+    close = "]"
+): string | null {
+    const m = code.match(startRegex);
+    if (!m) return null;
+    let i = (m.index ?? 0) + m[0].length, depth = 1;
+    while (i < code.length && depth > 0) {
+        const ch = code[i];
+        if (ch === open) depth++;
+        else if (ch === close) depth--;
+        i++;
+    }
+    if (depth !== 0) throw new Error(`Unausgeglichene Klammerung für Block: ${startRegex}`);
+    const start = (m.index ?? 0) + m[0].length;
+    const end = i - 1;
+    return code.slice(start, end);
+}
+
+
 // Разбить текст верхнего уровня на JSON-объекты по балансировке {}
 export function splitTopLevelObjects(inner: string): string[] {
     const out: string[] = [];

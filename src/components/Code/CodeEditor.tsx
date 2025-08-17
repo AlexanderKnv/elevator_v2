@@ -17,7 +17,7 @@ export default function CodeEditor() {
     const kabinen = useSelector((state: RootState) => state.kabine.kabinen);
     const ruftasten = useSelector((state: RootState) => state.ruftaste);
     const anzeigeEtagen = useSelector((state: RootState) => state.anzeige.etagenMitAnzeige);
-    const [style, setStyle] = useState<CodeStyle>('Deklarativ');
+    const [style, setStyle] = useState<CodeStyle>('Imperativ');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [code, setCode] = useState('');
     const dispatch = useDispatch();
@@ -59,8 +59,8 @@ export default function CodeEditor() {
                         value={style}
                         onChange={(e) => setStyle(e.target.value as CodeStyle)}
                     >
-                        <option className="option-select" value="Deklarativ">Deklarativ</option>
                         <option className="option-select" value="Imperativ">Imperativ</option>
+                        <option className="option-select" value="Deklarativ">Deklarativ</option>
                         <option className="option-select" value="OOP">Objektorientiert</option>
                     </select>
                 </div>

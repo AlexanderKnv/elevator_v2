@@ -1,20 +1,20 @@
 import { etageVar } from "../../../../helpers/renderHelper";
 
 export function generateOopAnzeigeCode(etagenMitAnzeige: number[]): string {
-    const uniqSorted = Array.from(new Set(etagenMitAnzeige ?? [])).sort((a, b) => a - b);
+    if (!etagenMitAnzeige || etagenMitAnzeige.length === 0) return "";
 
-    const instances =
-        uniqSorted.length > 0
-            ? uniqSorted.map((n) => `anzeige_panel_${n} = AnzeigePanel(${etageVar(n)})`).join("\n") + "\n"
-            : "";
+    const uniqSorted = Array.from(new Set(etagenMitAnzeige)).sort((a, b) => a - b);
 
-    return [oopClassDef(), instances].join("\n").trimEnd();
-}
-
-function oopClassDef(): string {
-    return [
+    const classDef = [
         `class AnzeigePanel:`,
         `    def __init__(self, etage):`,
         `        self.etage = etage`,
+        ``,
     ].join("\n");
+
+    const instances = uniqSorted
+        .map((n) => `anzeige_panel_${n} = AnzeigePanel(${etageVar(n)})`)
+        .join("\n");
+
+    return [classDef, instances].join("\n").trimEnd();
 }

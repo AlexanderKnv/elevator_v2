@@ -4,7 +4,7 @@ import { pyBoolTF, etageVar, etageVarOrNone, etageVarArray, pyNoneOrQuoted } fro
 
 export function generateOopKabinenCode(kabinen: Kabine[]): string {
     if (!kabinen || kabinen.length === 0) {
-        return oopClassDef().trim();
+        return "";
     }
 
     const instances = sortKabinenById(kabinen).map((k) => {

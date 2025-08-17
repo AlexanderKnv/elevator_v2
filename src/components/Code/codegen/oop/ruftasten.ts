@@ -2,47 +2,51 @@ import type { Richtung } from "../../../../store/ruftasteSlice";
 import { etageVar } from "../../../../helpers/renderHelper";
 
 export function generateOopRuftasteCode(
-    etagenMitRuftasten: number[],
-    aktiveRuftasten: { etage: number; callDirection: Richtung }[]
+    etagenMitRuftasten: number[] = [],
+    aktiveRuftasten: { etage: number; callDirection: Richtung }[] = []
 ): string {
-    const etagen = Array.from(new Set(etagenMitRuftasten ?? [])).sort((a, b) => a - b);
-    const active = [...(aktiveRuftasten ?? [])]
-        .map(x => ({ etage: x.etage, callDirection: x.callDirection }))
-        .sort(
-            (a, b) =>
-                a.etage - b.etage ||
-                (a.callDirection === "up" && b.callDirection === "down" ? -1 :
-                    a.callDirection === b.callDirection ? 0 : 1)
-        );
+    const hasPanels = (etagenMitRuftasten?.length ?? 0) > 0;
+    const hasCalls = (aktiveRuftasten?.length ?? 0) > 0;
 
-    const panelLines = etagen.map(n => `panel_${n} = RuftastenPanel(${etageVar(n)})`).join("\n");
-    const aktiveLines = active
-        .map(e => `    AktiverRuf(panel_${e.etage}, "${e.callDirection}")`)
-        .join(",\n");
+    if (!hasPanels && !hasCalls) return "";
 
-    const parts = [
-        oopPanelClassDef(),
-        panelLines ? "\n" + panelLines + "\n" : "\n",
-        oopActiveClassDef(),
-        `aktive_ruftasten = [\n${aktiveLines}\n]`,
-    ];
+    const parts: string[] = [];
+
+    if (hasPanels) {
+        const classPanel = [
+            `class RuftastenPanel:`,
+            `    def __init__(self, etage):`,
+            `        self.etage = etage`,
+            ``,
+        ].join("\n");
+
+        const panels = [...new Set(etagenMitRuftasten)]
+            .sort((a, b) => a - b)
+            .map((nr) => `panel_${nr} = RuftastenPanel(${etageVar(nr)})`)
+            .join("\n");
+
+        parts.push(classPanel + panels);
+    }
+
+    if (hasCalls) {
+        const classCall = [
+            ``,
+            `class AktiverRuf:`,
+            `    def __init__(self, panel, direction):`,
+            `        self.panel = panel`,
+            `        self.direction = direction`,
+            ``,
+        ].join("\n");
+
+        const calls = aktiveRuftasten
+            .map(
+                (r, idx) =>
+                    `aktiver_ruf_${idx + 1} = AktiverRuf(panel_${r.etage}, "${r.callDirection}")`
+            )
+            .join("\n");
+
+        parts.push(classCall + calls);
+    }
 
     return parts.join("\n").trimEnd();
-}
-
-function oopPanelClassDef(): string {
-    return [
-        `class RuftastenPanel:`,
-        `    def __init__(self, etage):`,
-        `        self.etage = etage`,
-    ].join("\n");
-}
-
-function oopActiveClassDef(): string {
-    return [
-        `class AktiverRuf:`,
-        `    def __init__(self, panel, direction):`,
-        `        self.panel = panel`,
-        `        self.direction = direction`,
-    ].join("\n");
 }

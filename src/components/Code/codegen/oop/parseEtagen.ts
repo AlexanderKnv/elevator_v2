@@ -4,27 +4,44 @@ import { checkEtageRange } from "../../../../helpers/validationHelper";
 export function parseOopEtagenCode(code: string): number[] {
     const text = stripHashComments(code);
 
-    const re = /^\s*etage_(\d+)\s*=\s*Etage\s*\(\s*(\d+)\s*\)\s*$/gm;
+    const lines = text
+        .split("\n")
+        .map((l) => l.trim())
+        .filter((l) => l.startsWith("etage_"));
 
-    const seen = new Set<number>();
+    if (lines.length === 0) return [];
+
     const out: number[] = [];
-    let m: RegExpExecArray | null;
+    const seen = new Set<number>();
 
-    while ((m = re.exec(text)) !== null) {
-        const varId = parseInt(m[1], 10);
-        const nr = parseInt(m[2], 10);
-
-        if (varId !== nr) {
-            throw new Error(`Ungültige Etage: etage_${varId} muss Etage(${varId}) sein.`);
+    lines.forEach((line, idx) => {
+        const m = line.match(/^etage_(\d+)\s*=\s*Etage\s*\(\s*(\d+)\s*\)\s*$/);
+        if (!m) {
+            throw new Error(
+                `Ungültige Etage in Zeile ${idx + 1}: "${line}". Erwartet: etage_<nr> = Etage(<nr>).`
+            );
         }
 
-        checkEtageRange(nr, "nr");
+        const varNum = parseInt(m[1], 10);
+        const ctorNum = parseInt(m[2], 10);
 
-        if (seen.has(nr)) {
-            throw new Error(`Doppelte Etage: ${nr}.`);
+        if (varNum !== ctorNum) {
+            throw new Error(
+                `Ungültige Etage: "etage_${varNum} = Etage(${ctorNum})". Erwartet: etage_${varNum} = Etage(${varNum}).`
+            );
         }
-        seen.add(nr);
-        out.push(nr);
+
+        checkEtageRange(ctorNum, "nr");
+
+        if (seen.has(ctorNum)) {
+            throw new Error(`Doppelte Etage gefunden: "${ctorNum}".`);
+        }
+        seen.add(ctorNum);
+        out.push(ctorNum);
+    });
+
+    if (out.length > 3) {
+        throw new Error(`Zu viele Etagen definiert (${out.length}). Maximal sind 3 erlaubt.`);
     }
 
     return out.sort((a, b) => a - b);
