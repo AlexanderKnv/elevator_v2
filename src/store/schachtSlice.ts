@@ -1,8 +1,9 @@
-// src/store/schachtSlice.ts
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-interface SchachtState {
-    etagenMitSchacht: number[];
+export type SchachtSide = 'left' | 'right';
+
+export interface SchachtState {
+    etagenMitSchacht: { etage: number; sides: SchachtSide[] }[];
 }
 
 const initialState: SchachtState = {
@@ -13,20 +14,39 @@ const schachtSlice = createSlice({
     name: 'schacht',
     initialState,
     reducers: {
-        addSchachtToEtage: (state, action: PayloadAction<number>) => {
-            const etage = action.payload;
-            if (!state.etagenMitSchacht.includes(etage)) {
-                state.etagenMitSchacht.push(etage);
+        addSchachtToEtage: (
+            state,
+            action: PayloadAction<{ etage: number; side: SchachtSide }>
+        ) => {
+            const { etage, side } = action.payload;
+            const entry = state.etagenMitSchacht.find((e) => e.etage === etage);
+
+            if (entry) {
+                if (!entry.sides.includes(side) && entry.sides.length < 2) {
+                    entry.sides.push(side);
+                }
+            } else {
+                state.etagenMitSchacht.push({ etage, sides: [side] });
             }
         },
-        removeSchachtFromEtage: (state, action: PayloadAction<number>) => {
-            state.etagenMitSchacht = state.etagenMitSchacht.filter(n => n !== action.payload);
-        },
-        resetSchacht: (state) => {
-            state.etagenMitSchacht = [];
+        removeSchachtFromEtage: (
+            state,
+            action: PayloadAction<{ etage: number; side: SchachtSide }>
+        ) => {
+            const { etage, side } = action.payload;
+            const entry = state.etagenMitSchacht.find((e) => e.etage === etage);
+            if (!entry) return;
+
+            entry.sides = entry.sides.filter((s) => s !== side);
+
+            if (entry.sides.length === 0) {
+                state.etagenMitSchacht = state.etagenMitSchacht.filter(
+                    (e) => e.etage !== etage
+                );
+            }
         },
     },
 });
 
-export const { addSchachtToEtage, removeSchachtFromEtage, resetSchacht } = schachtSlice.actions;
+export const { addSchachtToEtage, removeSchachtFromEtage } = schachtSlice.actions;
 export default schachtSlice.reducer;
