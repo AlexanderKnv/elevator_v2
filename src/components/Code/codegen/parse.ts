@@ -13,11 +13,16 @@ import { parseOopRuftasteCode } from './oop/parseRuftasten';
 import { parseDeklarativAnzeigeCode } from './deklarativ/parseAnzeige';
 import { parseImperativAnzeigeCode } from './imperativ/parseAnzeige';
 import { parseOopAnzeigeCode } from './oop/parseAnzeige';
+import type { AnzeigeState } from '../../../store/anzeigeSlice ';
+import type { SchachtState } from '../../../store/schachtSlice';
+import { parseDeklarativSchachtCode } from './deklarativ/parseSchacht';
+import { parseImperativSchachtCode } from './imperativ/parseSchacht';
+import { parseOopSchachtCode } from './oop/parseSchacht';
 
 export function parseCode(
     style: CodeStyle,
     code: string
-): { etagen: number[]; kabinen: Kabine[]; ruftasten: RuftasteState, anzeige: { etagenMitAnzeige: number[] }; } {
+): { etagen: number[]; kabinen: Kabine[]; ruftasten: RuftasteState, anzeige: AnzeigeState, schacht: SchachtState } {
     switch (style) {
         case 'Deklarativ':
             return {
@@ -25,6 +30,7 @@ export function parseCode(
                 kabinen: parseDeklarativKabinenCode(code),
                 ruftasten: parseDeklarativRuftasteCode(code),
                 anzeige: parseDeklarativAnzeigeCode(code),
+                schacht: parseDeklarativSchachtCode(code),
             };
         case 'Imperativ':
             return {
@@ -32,6 +38,7 @@ export function parseCode(
                 kabinen: parseImperativKabinenCode(code),
                 ruftasten: parseImperativRuftasteCode(code),
                 anzeige: parseImperativAnzeigeCode(code),
+                schacht: parseImperativSchachtCode(code),
             };
         case 'OOP':
             return {
@@ -39,6 +46,7 @@ export function parseCode(
                 kabinen: parseOopKabinenCode(code),
                 ruftasten: parseOopRuftasteCode(code),
                 anzeige: parseOopAnzeigeCode(code),
+                schacht: parseOopSchachtCode(code),
             };
         default:
             return {
@@ -46,6 +54,7 @@ export function parseCode(
                 kabinen: [],
                 ruftasten: { etagenMitRuftasten: [], aktiveRuftasten: [] },
                 anzeige: { etagenMitAnzeige: [] },
+                schacht: { etagenMitSchacht: [] },
             };
     }
 }

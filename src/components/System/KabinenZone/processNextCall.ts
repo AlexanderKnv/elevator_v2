@@ -1,28 +1,68 @@
-import { completeMovement, openDoors, removeCallFromQueue, removeZielEtage, setDoorsState, setDirectionMovement, setTargetEtage, setCurrentEtage } from "../../../store/kabineSlice";
+import { completeMovement, openDoors, removeCallFromQueue, removeZielEtage, setDoorsState, setDirectionMovement, setTargetEtage, setCurrentEtage, type KabineSide, type Kabine } from "../../../store/kabineSlice";
 import { deactivateRuftaste } from "../../../store/ruftasteSlice";
 import type { AppDispatch } from "../../../store/store";
 
 type Direction = 'up' | 'down' | null;
 
-export const processNextCall = () => (dispatch: AppDispatch, getState: () => any) => {
+// --- Hall-call claims (module-scope «claim-on-ready») ---
+type HallDir = 'up' | 'down';
+type HallKey = `${number}|${HallDir}`;
+const hallClaims = new Map<HallKey, KabineSide>();
+const hallKey = (etage: number, dir: HallDir) => `${etage}|${dir}` as HallKey;
+
+const canClaim = (side: KabineSide, etage: number, dirs: HallDir[]) => {
+    for (const d of dirs) {
+        const cur = hallClaims.get(hallKey(etage, d));
+        if (cur && cur !== side) return false;
+    }
+    return true;
+};
+const claim = (side: KabineSide, etage: number, dirs: HallDir[]) => {
+    for (const d of dirs) hallClaims.set(hallKey(etage, d), side);
+};
+const release = (etage: number, dirs: HallDir[] = ['up', 'down']) => {
+    for (const d of dirs) hallClaims.delete(hallKey(etage, d));
+};
+
+
+export const processNextCall = (side: KabineSide) => (dispatch: AppDispatch, getState: () => any) => {
     const state = getState();
-    const kabine = state.kabine.kabinen[0];
+    const kabine = state.kabine.kabinen.find((k: Kabine) => k.side === side);
     const uniq = (arr: number[]) => Array.from(new Set(arr));
     if (!kabine || kabine.isMoving) return;
 
     const currentEtage = kabine.currentEtage;
 
-    // Внутренние цели — ИЗ aktiveZielEtagen
-    const zielEtagen: number[] = state.kabine.kabinen[0]?.aktiveZielEtagen ?? [];
+    // Interne Ziele aus aktiveZielEtagen ableiten
+    const zielEtagen: number[] = state.kabine.kabinen.find((k: Kabine) => k.side === side)?.aktiveZielEtagen ?? [];
     const internalSet = new Set(zielEtagen);
 
-    // Холл-вызовы
-    const aktiveRuftasten = (state.ruftaste.aktiveRuftasten ?? []) as { etage: number; callDirection: 'up' | 'down' }[];
+    // Andere Kabine – weiches Deduplizieren anhand ihrer Warteschlange
+    const otherSide: KabineSide = side === 'left' ? 'right' : 'left';
+    const otherKabine = state.kabine.kabinen.find((k: Kabine) => k.side === otherSide);
+    const reservedByOther = new Set<number>([
+        ...(otherKabine?.callQueue ?? []),
+        ...(otherKabine?.aktiveZielEtagen ?? []),
+    ]);
+
+    // Hallrufe (Claims + Busy-Status der anderen Kabine berücksichtigen)
+    const allHall = (state.ruftaste.aktiveRuftasten ?? []) as { etage: number; callDirection: 'up' | 'down' }[];
+    const aktiveRuftasten = allHall.filter(r => {
+        const claimed = hallClaims.get(hallKey(r.etage, r.callDirection));
+        const freeOrMine = !claimed || claimed === side;
+        const notOtherReserved = !reservedByOther.has(r.etage);
+        return freeOrMine && notOtherReserved;
+    });
     const hallUp = new Set(aktiveRuftasten.filter(r => r.callDirection === 'up').map(r => r.etage));
     const hallDown = new Set(aktiveRuftasten.filter(r => r.callDirection === 'down').map(r => r.etage));
 
-    // Если совсем пусто — ничего не делаем
-    if (zielEtagen.length === 0 && aktiveRuftasten.length === 0) return;
+    // Bei Leerzustand: keine Aktion
+    if (zielEtagen.length === 0 && aktiveRuftasten.length === 0) {
+        if (kabine.directionMovement) {
+            dispatch(setDirectionMovement({ side, direction: null }));
+        }
+        return;
+    }
 
     const isAhead = (from: number, to: number, dir: Exclude<Direction, null>) => (dir === 'up' ? to > from : to < from);
 
@@ -52,46 +92,61 @@ export const processNextCall = () => (dispatch: AppDispatch, getState: () => any
 
     let directionMovement: Direction = kabine.directionMovement ?? null;
 
-    // Если направления нет — выбери по текущему холлу либо ближайшему требованию
+    // Kein Richtungsflag → Entscheidung nach Ruf auf der Rufetage oder nach der nächsten Anforderung
     if (!directionMovement) {
         if (hallUp.has(currentEtage)) directionMovement = 'up';
         else if (hallDown.has(currentEtage)) directionMovement = 'down';
         else directionMovement = nearestDemandDirection();
-        dispatch(setDirectionMovement(directionMovement));
+        dispatch(setDirectionMovement({ side, direction: directionMovement }));
     }
 
-    // Нужно ли остановиться прямо здесь?
+    // Soll hier gehalten werden?
     const shouldStopHere = (dir: Direction) => {
-        if (internalSet.has(currentEtage)) return true;
-        if (!dir) return hallUp.has(currentEtage) || hallDown.has(currentEtage); // без направления — обслуживаем любой холл на текущем
-        return dir === 'up' ? hallUp.has(currentEtage) : hallDown.has(currentEtage);
+        const internalHere = internalSet.has(currentEtage);
+        const hallHere = dir
+            ? (dir === 'up' ? hallUp.has(currentEtage) : hallDown.has(currentEtage))
+            : (hallUp.has(currentEtage) || hallDown.has(currentEtage));
+
+        if (internalHere) return true; // Interne Ziele werden ohne Claim verarbeitet
+
+        if (hallHere) {
+            const dirsToClaim: HallDir[] = [];
+            if (!dir || dir === 'up') { if (hallUp.has(currentEtage)) dirsToClaim.push('up'); }
+            if (!dir || dir === 'down') { if (hallDown.has(currentEtage)) dirsToClaim.push('down'); }
+            if (dirsToClaim.length > 0 && canClaim(side, currentEtage, dirsToClaim)) {
+                claim(side, currentEtage, dirsToClaim);
+                return true;
+            }
+        }
+        return false;
     };
 
     if (shouldStopHere(directionMovement)) {
-        dispatch(openDoors());
-        dispatch(setDoorsState('opening'));
-        setTimeout(() => { dispatch(openDoors()); dispatch(setDoorsState('closing')); }, 5000);
+        dispatch(openDoors({ side }));
+        dispatch(setDoorsState({ side, state: 'opening' }));
+        setTimeout(() => { dispatch(openDoors({ side })); dispatch(setDoorsState({ side, state: 'closing' })); }, 5000);
         setTimeout(() => {
-            dispatch(setDoorsState('closed'));
+            dispatch(setDoorsState({ side, state: 'closed' }));
             dispatch(deactivateRuftaste({ etage: currentEtage, callDirection: 'up' }));
             dispatch(deactivateRuftaste({ etage: currentEtage, callDirection: 'down' }));
-            dispatch(removeZielEtage(currentEtage));
-            dispatch(removeCallFromQueue(currentEtage));
+            release(currentEtage);
+            dispatch(removeZielEtage({ side, etage: currentEtage }));
+            dispatch(removeCallFromQueue({ side, etage: currentEtage }));
             const s = getState();
-            const hasZiel = (s.kabine.kabinen[0]?.aktiveZielEtagen ?? []).length > 0;
+            const hasZiel = (s.kabine.kabinen.find((k: Kabine) => k.side === side)?.aktiveZielEtagen ?? []).length > 0;
             const hasHall = (s.ruftaste.aktiveRuftasten ?? []).length > 0;
-            if (hasZiel || hasHall) dispatch(processNextCall()); else dispatch(setDirectionMovement(null));
+            if (hasZiel || hasHall) dispatch(processNextCall(side)); else dispatch(setDirectionMovement({ side, direction: null }));
         }, 10000);
         return;
     }
 
-    // Кандидаты ВПЕРЁД по направлению: внутр. цели + холлы по направлению
+    // In Richtung voraus: Innenziele & Außenrufe in derselben Richtung
     const forwardHalls = directionMovement === 'up' ? Array.from(hallUp) : Array.from(hallDown);
     let candidates: number[] = directionMovement
         ? buildCandidates(uniq([...zielEtagen, ...forwardHalls]), currentEtage, directionMovement as Exclude<Direction, null>)
         : [];
 
-    // Если вперёд пусто — разворачиваемся
+    // Keine Ziele voraus → umkehren
     if (candidates.length === 0 && directionMovement) {
         const opposite = directionMovement === 'up' ? 'down' : 'up';
         const oppositeHalls = opposite === 'up' ? Array.from(hallUp) : Array.from(hallDown);
@@ -102,55 +157,68 @@ export const processNextCall = () => (dispatch: AppDispatch, getState: () => any
         );
         if (oppCandidates.length > 0) {
             directionMovement = opposite;
-            dispatch(setDirectionMovement(opposite));
+            dispatch(setDirectionMovement({ side, direction: opposite }));
             candidates = oppCandidates;
         }
     }
 
-    // 🔒 ФОЛБЭК: если всё ещё пусто — едем к ближайшему требованию (вне зависимости от направления)
+    // Фолбэк
     if (candidates.length === 0) {
         const nearest = nearestOf(demandFloorsAll);
-        if (nearest == null || nearest === currentEtage) { dispatch(setDirectionMovement(null)); return; }
+        if (nearest == null || nearest === currentEtage) { dispatch(setDirectionMovement({ side, direction: null })); return; }
         candidates = [nearest];
         directionMovement = nearest > currentEtage ? 'up' : 'down';
-        dispatch(setDirectionMovement(directionMovement));
+        dispatch(setDirectionMovement({ side, direction: directionMovement }));
     }
 
-    // Едем к следующему кандидату
+    // Weiter zum nächsten Kandidaten
     const nextEtage = candidates[0];
+
+    // Bei nächstem Ziel „Hall-Etage“: Pre-Claim versuchen; schlägt fehl → Neuberechnung.
+    const dirsToClaimAtNext: HallDir[] = [];
+    if (hallUp.has(nextEtage)) dirsToClaimAtNext.push('up');
+    if (hallDown.has(nextEtage)) dirsToClaimAtNext.push('down');
+    if (dirsToClaimAtNext.length > 0 && !canClaim(side, nextEtage, dirsToClaimAtNext)) {
+        // Etage bereits von der anderen Kabine geclaimt → Plan neu bewerten.
+        setTimeout(() => dispatch(processNextCall(side)), 0);
+        return;
+    }
+    if (dirsToClaimAtNext.length > 0) {
+        claim(side, nextEtage, dirsToClaimAtNext);
+    }
 
     let dif = Math.abs(nextEtage - currentEtage);
     const travelDuration = dif * 5000;
 
-    dispatch(setTargetEtage(nextEtage));
+    dispatch(setTargetEtage({ side, etage: nextEtage }));
 
     if (Math.abs(dif) > 1) {
         setTimeout(() => {
-            dispatch(setCurrentEtage(2));
+            dispatch(setCurrentEtage({ side, etage: 2 }));
             dif = 0;
         }, 5000)
     }
 
     setTimeout(() => {
+        dispatch(completeMovement({ side }));
 
-        dispatch(completeMovement());
-
-        // Снимаем требования на этаже прибытия
+        // Ankunftsetage: offene Anforderungen/Claims für diese Etage zurücksetzen
         dispatch(deactivateRuftaste({ etage: nextEtage, callDirection: 'up' }));
         dispatch(deactivateRuftaste({ etage: nextEtage, callDirection: 'down' }));
-        dispatch(removeZielEtage(nextEtage));
-        dispatch(removeCallFromQueue(nextEtage));
+        release(nextEtage);
 
-        // Двери
-        dispatch(openDoors());
-        dispatch(setDoorsState('opening'));
-        setTimeout(() => { dispatch(openDoors()); dispatch(setDoorsState('closing')); }, 5000);
+        dispatch(removeZielEtage({ side, etage: nextEtage }));
+        dispatch(removeCallFromQueue({ side, etage: nextEtage }));
+
+        dispatch(openDoors({ side }));
+        dispatch(setDoorsState({ side, state: 'opening' }));
+        setTimeout(() => { dispatch(openDoors({ side })); dispatch(setDoorsState({ side, state: 'closing' })); }, 5000);
         setTimeout(() => {
-            dispatch(setDoorsState('closed'));
+            dispatch(setDoorsState({ side, state: 'closed' }));
             const s = getState();
-            const hasZiel = (s.kabine.kabinen[0]?.aktiveZielEtagen ?? []).length > 0;
+            const hasZiel = (s.kabine.kabinen.find((k: Kabine) => k.side === side)?.aktiveZielEtagen ?? []).length > 0;
             const hasHall = (s.ruftaste.aktiveRuftasten ?? []).length > 0;
-            if (hasZiel || hasHall) dispatch(processNextCall()); else dispatch(setDirectionMovement(null));
+            if (hasZiel || hasHall) dispatch(processNextCall(side)); else dispatch(setDirectionMovement({ side, direction: null }));
         }, 10000);
     }, travelDuration);
 };

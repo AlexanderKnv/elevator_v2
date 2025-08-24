@@ -11,20 +11,22 @@ import { resetKabinen } from '../../store/kabineSlice';
 import { parseCode } from './codegen/parse';
 import { resetRuftasten } from '../../store/ruftasteSlice';
 import { resetAnzeige } from '../../store/anzeigeSlice ';
+import { resetSchacht } from '../../store/schachtSlice';
 
 export default function CodeEditor() {
     const etagen = useSelector((state: RootState) => state.etage.etagen);
     const kabinen = useSelector((state: RootState) => state.kabine.kabinen);
     const ruftasten = useSelector((state: RootState) => state.ruftaste);
-    const anzeigeEtagen = useSelector((state: RootState) => state.anzeige.etagenMitAnzeige);
+    const anzeige = useSelector((s: RootState) => s.anzeige);
+    const schacht = useSelector((s: RootState) => s.schacht);
     const [style, setStyle] = useState<CodeStyle>('Imperativ');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [code, setCode] = useState('');
     const dispatch = useDispatch();
 
     useEffect(() => {
-        setCode(generateCode(style, etagen, kabinen, ruftasten, anzeigeEtagen));
-    }, [style, etagen, kabinen, ruftasten, anzeigeEtagen]);
+        setCode(generateCode(style, etagen, kabinen, ruftasten, anzeige, schacht));
+    }, [style, etagen, kabinen, ruftasten, anzeige, schacht]);
 
     const handleRun = () => {
         setErrorMessage(null);
@@ -34,12 +36,14 @@ export default function CodeEditor() {
                 kabinen: parsedKabinen,
                 ruftasten: parsedRuftasten,
                 anzeige: parsedAnzeige,
+                schacht: parsedSchacht,
             } = parseCode(style, code);
 
             dispatch(resetEtagen(parsedEtagen));
             dispatch(resetKabinen(parsedKabinen));
             dispatch(resetRuftasten(parsedRuftasten));
-            dispatch(resetAnzeige(parsedAnzeige.etagenMitAnzeige));
+            dispatch(resetAnzeige(parsedAnzeige));
+            dispatch(resetSchacht(parsedSchacht));
         } catch (err) {
             //@ts-ignore
             setErrorMessage(err.message);

@@ -1,7 +1,10 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
+export type KabineSide = 'left' | 'right';
+
 export interface Kabine {
     id: string;
+    side: KabineSide;
     currentEtage: number;
     doorsOpen: boolean;
     targetEtage: number | null;
@@ -21,15 +24,30 @@ const initialState: KabineState = {
     kabinen: [],
 };
 
-const kabineSlice = createSlice({
+// helpers
+const findIndexBySide = (state: KabineState, side: KabineSide) =>
+    state.kabinen.findIndex((k) => k.side === side);
+
+const mustGetBySide = (state: KabineState, side: KabineSide) => {
+    const idx = findIndexBySide(state, side);
+    return idx >= 0 ? state.kabinen[idx] : undefined;
+};
+
+export const kabineSlice = createSlice({
     name: 'kabine',
     initialState,
     reducers: {
-        addKabine: (state, action: PayloadAction<{ etage: number }>) => {
-            const nextId = `kabine-${state.kabinen.length + 1}`;
+        addKabine: (
+            state,
+            action: PayloadAction<{ etage: number; side: KabineSide }>
+        ) => {
+            const { etage, side } = action.payload;
+            if (findIndexBySide(state, side) !== -1) return;
+            const nextId = `kabine-${side}`;
             state.kabinen.push({
                 id: nextId,
-                currentEtage: action.payload.etage,
+                side,
+                currentEtage: etage,
                 doorsOpen: false,
                 targetEtage: null,
                 isMoving: false,
@@ -40,74 +58,87 @@ const kabineSlice = createSlice({
                 doorsState: 'closed',
             });
         },
-        setCurrentEtage: (state, action: PayloadAction<number>) => {
-            const kabine = state.kabinen[0];
-            if (kabine) {
-                kabine.currentEtage = action.payload;
-            }
-        },
-        setTargetEtage: (state, action: PayloadAction<number>) => {
-            const kabine = state.kabinen[0];
-            if (!kabine || kabine.isMoving) return;
-            kabine.targetEtage = action.payload;
-            kabine.isMoving = true;
-            kabine.doorsOpen = false;
-        },
-        completeMovement: (state) => {
-            const kabine = state.kabinen[0];
-            if (!kabine || kabine.targetEtage === null) return;
-            kabine.currentEtage = kabine.targetEtage;
-            kabine.targetEtage = null;
-            kabine.isMoving = false;
-        },
-        openDoors: (state) => {
-            const kabine = state.kabinen[0];
-            if (!kabine) return;
-            kabine.doorsOpen = !kabine.doorsOpen;
-        },
-        addCallToQueue: (state, action: PayloadAction<number>) => {
-            const kabine = state.kabinen[0];
-            if (!kabine) return;
 
-            if (!kabine.callQueue.includes(action.payload)) {
-                kabine.callQueue.push(action.payload);
+        removeKabine: (state, action: PayloadAction<{ side: KabineSide }>) => {
+            state.kabinen = state.kabinen.filter((k) => k.side !== action.payload.side);
+        },
+
+        setCurrentEtage: (state, action: PayloadAction<{ side: KabineSide; etage: number }>) => {
+            const k = mustGetBySide(state, action.payload.side);
+            if (k) k.currentEtage = action.payload.etage;
+        },
+
+        setTargetEtage: (state, action: PayloadAction<{ side: KabineSide; etage: number }>) => {
+            const k = mustGetBySide(state, action.payload.side);
+            if (!k || k.isMoving) return;
+            k.targetEtage = action.payload.etage;
+            k.isMoving = true;
+            k.doorsOpen = false;
+        },
+
+        completeMovement: (state, action: PayloadAction<{ side: KabineSide }>) => {
+            const k = mustGetBySide(state, action.payload.side);
+            if (!k || k.targetEtage === null) return;
+            k.currentEtage = k.targetEtage;
+            k.targetEtage = null;
+            k.isMoving = false;
+        },
+
+        openDoors: (state, action: PayloadAction<{ side: KabineSide }>) => {
+            const k = mustGetBySide(state, action.payload.side);
+            if (k) k.doorsOpen = !k.doorsOpen;
+        },
+
+        addCallToQueue: (state, action: PayloadAction<{ side: KabineSide; etage: number }>) => {
+            const k = mustGetBySide(state, action.payload.side);
+            if (!k) return;
+            if (!k.callQueue.includes(action.payload.etage)) {
+                k.callQueue.push(action.payload.etage);
             }
         },
-        removeCallFromQueue: (state, action: PayloadAction<number>) => {
-            const kabine = state.kabinen[0];
-            if (!kabine) return;
-            kabine.callQueue = kabine.callQueue.filter(etage => etage !== action.payload);
+        removeCallFromQueue: (state, action: PayloadAction<{ side: KabineSide; etage: number }>) => {
+            const k = mustGetBySide(state, action.payload.side);
+            if (!k) return;
+            k.callQueue = k.callQueue.filter((e) => e !== action.payload.etage);
         },
-        setDirectionMovement: (state, action: PayloadAction<'up' | 'down' | null>) => {
-            if (state.kabinen[0]) {
-                state.kabinen[0].directionMovement = action.payload;
+
+        setDirectionMovement: (
+            state,
+            action: PayloadAction<{ side: KabineSide; direction: 'up' | 'down' | null }>
+        ) => {
+            const k = mustGetBySide(state, action.payload.side);
+            if (k) k.directionMovement = action.payload.direction;
+        },
+
+        addZielEtage: (state, action: PayloadAction<{ side: KabineSide; etage: number }>) => {
+            const k = mustGetBySide(state, action.payload.side);
+            if (!k) return;
+            if (!k.aktiveZielEtagen.includes(action.payload.etage)) {
+                k.aktiveZielEtagen.push(action.payload.etage);
             }
         },
+        removeZielEtage: (state, action: PayloadAction<{ side: KabineSide; etage: number }>) => {
+            const k = mustGetBySide(state, action.payload.side);
+            if (!k) return;
+            k.aktiveZielEtagen = k.aktiveZielEtagen.filter((e) => e !== action.payload.etage);
+        },
+
+        addBedienpanelToKabine: (state, action: PayloadAction<{ side: KabineSide }>) => {
+            const k = mustGetBySide(state, action.payload.side);
+            if (k) k.hasBedienpanel = true;
+        },
+
+        setDoorsState: (
+            state,
+            action: PayloadAction<{ side: KabineSide; state: 'open' | 'closed' | 'opening' | 'closing' }>
+        ) => {
+            const k = mustGetBySide(state, action.payload.side);
+            if (k) k.doorsState = action.payload.state;
+        },
+
         resetKabinen: (state, action: PayloadAction<Kabine[]>) => {
             state.kabinen = action.payload;
         },
-        addZielEtage: (state, action: PayloadAction<number>) => {
-            if (!state.kabinen[0].aktiveZielEtagen.includes(action.payload)) {
-                state.kabinen[0].aktiveZielEtagen.push(action.payload);
-            }
-        },
-        removeZielEtage: (state, action: PayloadAction<number>) => {
-            state.kabinen[0].aktiveZielEtagen = state.kabinen[0].aktiveZielEtagen.filter(
-                (etage) => etage !== action.payload
-            );
-        },
-        addBedienpanelToKabine: (state) => {
-            if (state.kabinen[0]) {
-                state.kabinen[0].hasBedienpanel = true;
-            }
-        },
-        setDoorsState: (state, action: PayloadAction<'open' | 'closed' | 'opening' | 'closing'>) => {
-            const kabine = state.kabinen[0];
-            if (kabine) {
-                kabine.doorsState = action.payload;
-            }
-        }
-
     },
 });
 
@@ -127,4 +158,3 @@ export const {
     setCurrentEtage,
 } = kabineSlice.actions;
 export default kabineSlice.reducer;
-

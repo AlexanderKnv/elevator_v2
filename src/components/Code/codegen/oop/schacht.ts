@@ -1,12 +1,12 @@
 import { etageVar } from "../../../../helpers/renderHelper";
-import type { AnzeigeState } from "../../../../store/anzeigeSlice ";
+import type { SchachtState } from "../../../../store/schachtSlice";
 
-export function generateOopAnzeigeCode(state: AnzeigeState): string {
-    const entries = state?.etagenMitAnzeige ?? [];
+export function generateOopSchachtCode(state: SchachtState): string {
+    const entries = state?.etagenMitSchacht ?? [];
     if (entries.length === 0) return "";
 
     const classDef = [
-        `class AnzeigePanel:`,
+        `class SchachtPanel:`,
         `    def __init__(self, etage, side):`,
         `        self.etage = etage`,
         `        self.side = side`,
@@ -22,7 +22,7 @@ export function generateOopAnzeigeCode(state: AnzeigeState): string {
         );
         orderedSides.forEach((side) => {
             instances.push(
-                `anzeige_panel_${e.etage}_${side} = AnzeigePanel(${etageVar(
+                `schacht_panel_${e.etage}_${side} = SchachtPanel(${etageVar(
                     e.etage
                 )}, "${side}")`
             );

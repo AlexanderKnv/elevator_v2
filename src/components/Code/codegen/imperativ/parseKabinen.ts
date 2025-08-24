@@ -1,149 +1,123 @@
-import type { Kabine } from "../../../../store/kabineSlice";
+import type { Kabine, KabineSide } from "../../../../store/kabineSlice";
 import { stripHashComments } from "../../../../helpers/parsingHelper";
-import { checkEtageRange, ensureTargetNotEqualCurrent, ensureDirectionConsistent } from "../../../../helpers/validationHelper";
-import { toKabineState } from "../../../../helpers/kabineHelper";
+import { checkEtageRange } from "../../../../helpers/validationHelper";
 
 export function parseImperativKabinenCode(code: string): Kabine[] {
-    const text = stripHashComments(code);
-    const lines = text.split("\n");
+    const base = stripHashComments(code);
 
-    type Acc = Record<string, Record<string, string>>;
-    const acc: Acc = {};
-    const assignRe = /^\s*kabine_(\d+)_([a-z_]+)\s*=\s*(.+?)\s*$/;
-
-    for (const raw of lines) {
-        const line = raw.trim();
-        if (!line) continue;
-        const m = line.match(assignRe);
-        if (!m) continue;
-
-        const [, idStr, key, val] = m;
-        (acc[idStr] ||= {})[key] = val.trim();
-    }
-
-    const ids = Object.keys(acc)
-        .map((s) => parseInt(s, 10))
-        .sort((a, b) => a - b);
-
-    if (ids.length === 0) return [];
-
-    const etageVarRe = /^etage_(\d+)$/i;
-
-    const parseIntStrict = (src: string, label: string, kabIdx: number): number => {
-        const m = src.match(/^-?\d+$/);
-        if (!m) throw new Error(`Kabine #${kabIdx}: Feld "${label}" muss eine ganze Zahl sein.`);
-        return parseInt(src, 10);
+    const readStr = (src: string, idx: number, key: string, label: string): string => {
+        const re = new RegExp(`\\bkabine_${idx}_${key}\\s*=\\s*"([^"]+)"`);
+        const m = src.match(re);
+        if (!m) throw new Error(`Kabine ${idx}: Feld "${label}" fehlt oder ist ungültig (String erwartet).`);
+        return m[1];
     };
 
-    const parseEtageVar = (src: string, label: string, kabIdx: number): number => {
-        const m = src.match(etageVarRe);
-        if (!m) throw new Error(`Kabine #${kabIdx}: Feld "${label}" muss etage_<n> sein.`);
-        const n = parseInt(m[1], 10);
-        checkEtageRange(n, label, kabIdx);
+    const readBoolTF = (src: string, idx: number, key: string, label: string): boolean => {
+        const re = new RegExp(`\\bkabine_${idx}_${key}\\s*=\\s*(True|False|true|false)`);
+        const m = src.match(re);
+        if (!m) throw new Error(`Kabine ${idx}: Feld "${label}" fehlt oder ist ungültig (True|False erwartet).`);
+        return m[1].toLowerCase() === "true";
+    };
+
+    const readEtageVar = (src: string, idx: number, key: string, label: string): number => {
+        const re = new RegExp(`\\bkabine_${idx}_${key}\\s*=\\s*(etage_(\\d+))`);
+        const m = src.match(re);
+        if (!m) throw new Error(`Kabine ${idx}: Feld "${label}" muss etage_<n> sein.`);
+        const n = parseInt(m[2], 10);
+        checkEtageRange(n, label, idx);
         return n;
     };
 
-    const parseEtageVarOrNone = (src: string, label: string, kabIdx: number): number | null => {
-        if (/^None$/i.test(src)) return null;
-        return parseEtageVar(src, label, kabIdx);
+    const readEtageVarOrNone = (src: string, idx: number, key: string, label: string): number | null => {
+        const re = new RegExp(`\\bkabine_${idx}_${key}\\s*=\\s*(None|null|etage_(\\d+))`);
+        const m = src.match(re);
+        if (!m) throw new Error(`Kabine ${idx}: Feld "${label}" muss None/null oder etage_<n> sein.`);
+        if (m[1].toLowerCase() === "none" || m[1].toLowerCase() === "null") return null;
+        const n = parseInt(m[2], 10);
+        checkEtageRange(n, label, idx);
+        return n;
     };
 
-    const parseEtageVarArray = (src: string, label: string, kabIdx: number): number[] => {
-        const m = src.match(/^\[\s*(.*?)\s*\]$/);
-        if (!m) {
-            throw new Error(
-                `Kabine #${kabIdx}: Feld "${label}" muss eine Liste von etage_<n> sein, z.B. [etage_1, etage_3].`
-            );
-        }
+    const readEtageVarArray = (src: string, idx: number, key: string, label: string): number[] => {
+        const re = new RegExp(`\\bkabine_${idx}_${key}\\s*=\\s*\\[([^\\]]*)\\]`);
+        const m = src.match(re);
+        if (!m) throw new Error(`Kabine ${idx}: Feld "${label}" fehlt oder ist ungültig (Liste erwartet).`);
         const body = m[1].trim();
         if (!body) return [];
-        return body.split(",").map((s) => parseEtageVar(s.trim(), label, kabIdx));
+        const parts = body.split(",").map((p) => p.trim()).filter(Boolean);
+        const out: number[] = [];
+        const seen = new Set<number>();
+        for (const p of parts) {
+            const mm = p.match(/^etage_(\d+)$/i);
+            if (!mm) throw new Error(`Kabine ${idx}: "${label}" enthält ungültigen Eintrag "${p}" (erwartet etage_<n>).`);
+            const n = parseInt(mm[1], 10);
+            checkEtageRange(n, label, idx);
+            if (seen.has(n)) throw new Error(`Kabine ${idx}: "${label}" enthält Duplikat Etage ${n}.`);
+            seen.add(n);
+            out.push(n);
+        }
+        return out;
     };
 
-    const parseBoolPy = (src: string, label: string, kabIdx: number): boolean => {
-        if (/^True$/i.test(src)) return true;
-        if (/^False$/i.test(src)) return false;
-        throw new Error(`Kabine #${kabIdx}: Feld "${label}" muss True|False sein.`);
+    const readDirNone = (src: string, idx: number, key: string, label: string): "up" | "down" | null => {
+        const re = new RegExp(`\\bkabine_${idx}_${key}\\s*=\\s*(None|null|"up"|"down")`);
+        const m = src.match(re);
+        if (!m) throw new Error(`Kabine ${idx}: Feld "${label}" muss None/null oder "up"/"down" sein.`);
+        const v = m[1];
+        if (v.toLowerCase() === "none" || v.toLowerCase() === "null") return null;
+        return v.slice(1, -1).toLowerCase() as "up" | "down";
     };
 
-    const parseDir = (src: string, label: string, kabIdx: number): "up" | "down" | null => {
-        if (/^None$/i.test(src)) return null;
-        const m = src.match(/^"(up|down)"$/);
-        if (!m) throw new Error(`Kabine #${kabIdx}: Feld "${label}" muss "up"|"down"|None sein.`);
-        return m[1] as "up" | "down";
-    };
+    const hasAnyFor = (idx: number) =>
+        new RegExp(
+            `\\bkabine_${idx}_(id|side|current_etage|target_etage|is_moving|tuer_offen|call_queue|direction_movement|has_bedienpanel|aktive_ziel_etagen)\\b`
+        ).test(base);
 
-    const out: Kabine[] = [];
+    const result: Kabine[] = [];
+    const usedSides = new Set<KabineSide>();
 
-    ids.forEach((idNum) => {
-        const obj = acc[String(idNum)];
-        const kabIdx = idNum;
+    for (let idx = 1; idx <= 2; idx++) {
+        if (!hasAnyFor(idx)) continue;
 
-        if (obj["id"] === undefined) throw new Error(`Kabine #${kabIdx}: Feld "id" fehlt.`);
-        const idVal = parseIntStrict(obj["id"], "id", kabIdx);
-        if (idVal !== idNum)
-            throw new Error(`Kabine #${kabIdx}: "id" muss ${idNum} sein (gemäß Variablennamen).`);
-
-        if (obj["current_etage"] === undefined)
-            throw new Error(`Kabine #${kabIdx}: Feld "current_etage" fehlt.`);
-        const currentEtage = parseEtageVar(obj["current_etage"], "current_etage", kabIdx);
-
-        let targetEtage: number | null = null;
-        if (obj["target_etage"] !== undefined) {
-            targetEtage = parseEtageVarOrNone(obj["target_etage"], "target_etage", kabIdx);
-            ensureTargetNotEqualCurrent(targetEtage, currentEtage, kabIdx);
+        const id = readStr(base, idx, "id", "id");
+        const sideStr = readStr(base, idx, "side", "side");
+        if (sideStr !== "left" && sideStr !== "right") {
+            throw new Error(`Kabine ${idx}: Feld "side" muss "left" oder "right" sein.`);
         }
-
-        const isMoving =
-            obj["is_moving"] !== undefined
-                ? parseBoolPy(obj["is_moving"], "is_moving", kabIdx)
-                : false;
-
-        const tuerOffen =
-            obj["tuer_offen"] !== undefined
-                ? parseBoolPy(obj["tuer_offen"], "tuer_offen", kabIdx)
-                : false;
-
-        const hasBedienpanel =
-            obj["has_bedienpanel"] !== undefined
-                ? parseBoolPy(obj["has_bedienpanel"], "has_bedienpanel", kabIdx)
-                : false;
-
-        const directionMovement =
-            obj["direction_movement"] !== undefined
-                ? parseDir(obj["direction_movement"], "direction_movement", kabIdx)
-                : null;
-
-        let callQueue: number[] = [];
-        if (obj["call_queue"] !== undefined) {
-            callQueue = parseEtageVarArray(obj["call_queue"], "call_queue", kabIdx);
+        const side = sideStr as KabineSide;
+        if (id !== `kabine-${side}`) {
+            throw new Error(`Kabine ${idx}: "id" muss "kabine-${side}" sein (gefunden "${id}").`);
         }
-
-        let aktiveZielEtagen: number[] = [];
-        if (obj["aktive_ziel_etagen"] !== undefined) {
-            aktiveZielEtagen = parseEtageVarArray(
-                obj["aktive_ziel_etagen"],
-                "aktive_ziel_etagen",
-                kabIdx
-            );
+        if (usedSides.has(side)) {
+            throw new Error(`Doppelte Kabine für Seite "${side}".`);
         }
+        usedSides.add(side);
 
-        ensureDirectionConsistent(directionMovement, currentEtage, targetEtage, kabIdx);
+        const currentEtage = readEtageVar(base, idx, "current_etage", "current_etage");
+        const targetEtage = readEtageVarOrNone(base, idx, "target_etage", "target_etage");
+        const isMoving = readBoolTF(base, idx, "is_moving", "is_moving");
+        const doorsOpen = readBoolTF(base, idx, "tuer_offen", "tuer_offen");
+        const callQueue = readEtageVarArray(base, idx, "call_queue", "call_queue");
+        const directionMovement = readDirNone(base, idx, "direction_movement", "direction_movement");
+        const hasBedienpanel = readBoolTF(base, idx, "has_bedienpanel", "has_bedienpanel");
+        const aktiveZielEtagen = readEtageVarArray(base, idx, "aktive_ziel_etagen", "aktive_ziel_etagen");
 
-        out.push(
-            toKabineState({
-                idNum,
-                currentEtage,
-                targetEtage,
-                isMoving,
-                doorsOpen: tuerOffen,
-                callQueue,
-                directionMovement,
-                hasBedienpanel,
-                aktiveZielEtagen,
-            })
-        );
-    });
+        result.push({
+            id,
+            side,
+            currentEtage,
+            targetEtage,
+            isMoving,
+            doorsOpen,
+            callQueue,
+            directionMovement,
+            hasBedienpanel,
+            aktiveZielEtagen,
+            doorsState: doorsOpen ? "open" : "closed",
+        });
+    }
 
-    return out;
+    if (result.length === 0) return [];
+
+    return result.sort((a, b) => (a.side === b.side ? a.id.localeCompare(b.id) : a.side === "left" ? -1 : 1));
 }

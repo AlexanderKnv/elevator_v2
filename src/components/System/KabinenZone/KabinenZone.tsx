@@ -6,8 +6,12 @@ import Bedienpanel from '../Bedienpanel/Bedienpanel';
 import { useDrop } from 'react-dnd';
 import { addBedienpanelToKabine } from '../../../store/kabineSlice';
 
-const KabinenZone: React.FC = () => {
-    const kabine = useSelector((state: RootState) => state.kabine.kabinen[0]);
+type KabinenZoneProps = {
+    side: 'left' | 'right';
+};
+
+const KabinenZone: React.FC<KabinenZoneProps> = ({ side }) => {
+    const kabine = useSelector((state: RootState) => state.kabine.kabinen.find(k => k.side === side));
     const totalEtagen = useSelector((state: RootState) => state.etage.etagen.length);
     const dispatch = useDispatch();
 
@@ -16,7 +20,7 @@ const KabinenZone: React.FC = () => {
         canDrop: () => !kabine?.hasBedienpanel,
         drop: () => {
             if (!kabine?.hasBedienpanel) {
-                dispatch(addBedienpanelToKabine());
+                dispatch(addBedienpanelToKabine({ side }));
             }
         },
         collect: (monitor) => ({
@@ -39,7 +43,7 @@ const KabinenZone: React.FC = () => {
 
     return (
         <div
-            className="lift-cabin"
+            className={`lift-cabin ${side}`}
             //@ts-ignore
             ref={dropRef}
             style={{
@@ -50,7 +54,7 @@ const KabinenZone: React.FC = () => {
         >
             <div className={`door left ${kabine.doorsOpen ? 'open' : ''}`} />
             <div className={`door right ${kabine.doorsOpen ? 'open' : ''}`} />
-            {kabine.hasBedienpanel && <Bedienpanel />}
+            {kabine.hasBedienpanel && <Bedienpanel side={side} />}
         </div>
     );
 };

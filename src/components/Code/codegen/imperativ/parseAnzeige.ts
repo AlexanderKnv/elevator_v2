@@ -1,30 +1,63 @@
-import { stripHashComments, extractBracketInner } from "../../../../helpers/parsingHelper";
+import { stripHashComments } from "../../../../helpers/parsingHelper";
 import { checkEtageRange } from "../../../../helpers/validationHelper";
+import type { AnzeigeSide, AnzeigeState } from "../../../../store/anzeigeSlice ";
 
-export function parseImperativAnzeigeCode(code: string): { etagenMitAnzeige: number[] } {
+export function parseImperativAnzeigeCode(code: string): AnzeigeState {
     const text = stripHashComments(code);
 
-    const re = /anzeige_etagen\s*=\s*\[/s;
-    if (!re.test(text)) return { etagenMitAnzeige: [] };
+    const parseSide = (side: AnzeigeSide): number[] => {
+        const re = new RegExp(`\\banzeige_${side}\\s*=\\s*\\[([^\\]]*)\\]`, "i");
+        const m = text.match(re);
+        if (!m) return [];
 
-    const inner = extractBracketInner(text, /anzeige_etagen\s*=\s*\[/s, "[", "]").trim();
-    if (!inner) return { etagenMitAnzeige: [] };
+        const inner = m[1].trim();
+        if (inner === "") return [];
 
-    const parts = inner.split(",").map((s) => s.trim()).filter(Boolean);
-    const etageVarRe = /^etage_(\d+)$/i;
-    const seen = new Set<number>();
-    const out: number[] = [];
+        const parts = inner
+            .split(",")
+            .map((p) => p.trim())
+            .filter(Boolean);
 
-    parts.forEach((p) => {
-        const m = p.match(etageVarRe);
-        if (!m) throw new Error(`anzeige_etagen: Ungültiger Eintrag "${p}" (erwartet etage_<n>).`);
-        const n = parseInt(m[1], 10);
-        checkEtageRange(n, "etage");
-        if (seen.has(n)) throw new Error(`anzeige_etagen: doppelte Etage ${n}.`);
-        seen.add(n);
-        out.push(n);
-    });
+        const out: number[] = [];
+        const seen = new Set<number>();
+        for (const p of parts) {
+            const mm = p.match(/^etage_(\d+)$/i);
+            if (!mm) {
+                throw new Error(
+                    `anzeige_${side}: Ungültiger Eintrag "${p}" (erwartet etage_<n>).`
+                );
+            }
+            const n = parseInt(mm[1], 10);
+            checkEtageRange(n, `anzeige_${side}`);
+            if (seen.has(n)) {
+                throw new Error(`anzeige_${side}: doppelte Etage ${n}.`);
+            }
+            seen.add(n);
+            out.push(n);
+        }
 
-    out.sort((a, b) => a - b);
-    return { etagenMitAnzeige: out };
+        out.sort((a, b) => a - b);
+        return out;
+    };
+
+    const left = parseSide("left");
+    const right = parseSide("right");
+
+    const byEtage = new Map<number, Set<AnzeigeSide>>();
+    const add = (n: number, s: AnzeigeSide) => {
+        if (!byEtage.has(n)) byEtage.set(n, new Set<AnzeigeSide>());
+        byEtage.get(n)!.add(s);
+    };
+
+    left.forEach((n) => add(n, "left"));
+    right.forEach((n) => add(n, "right"));
+
+    const etagenMitAnzeige = Array.from(byEtage.entries())
+        .map(([etage, set]) => ({
+            etage,
+            sides: Array.from(set).sort((a, b) => (a === b ? 0 : a === "left" ? -1 : 1)),
+        }))
+        .sort((a, b) => a.etage - b.etage);
+
+    return { etagenMitAnzeige };
 }

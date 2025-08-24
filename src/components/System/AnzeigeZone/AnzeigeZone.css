@@ -10,6 +10,13 @@
     padding: 1px 0;
     z-index: 50;
     width: 14%;
-    left: 13.5%;
     height: 7%;
+}
+
+.anzeige-panel.left {
+    left: 13.5%;
+}
+
+.anzeige-panel.right {
+    right: 13.5%;
 }

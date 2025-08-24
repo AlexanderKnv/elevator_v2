@@ -1,31 +1,51 @@
 import { stripHashComments } from "../../../../helpers/parsingHelper";
 import { checkEtageRange } from "../../../../helpers/validationHelper";
+import type { AnzeigeSide, AnzeigeState } from "../../../../store/anzeigeSlice ";
 
-export function parseOopAnzeigeCode(code: string): { etagenMitAnzeige: number[] } {
+export function parseOopAnzeigeCode(code: string): AnzeigeState {
     const text = stripHashComments(code);
 
-    const re = /^\s*anzeige_panel_(\d+)\s*=\s*AnzeigePanel\s*\(\s*etage_(\d+)\s*\)\s*$/gm;
+    const re = /anzeige_panel_(\d+)_(left|right)\s*=\s*AnzeigePanel\(\s*etage_(\d+)\s*,\s*"(left|right)"\s*\)/g;
 
-    const seen = new Set<number>();
-    const out: number[] = [];
+    const byEtage = new Map<number, Set<AnzeigeSide>>();
     let m: RegExpExecArray | null;
-
     while ((m = re.exec(text)) !== null) {
-        const varNum = parseInt(m[1], 10);
-        const etageNum = parseInt(m[2], 10);
+        const etageNumVar = parseInt(m[1], 10);
+        const sideFromName = m[2] as AnzeigeSide;
+        const etageNumArg = parseInt(m[3], 10);
+        const sideFromArg = m[4] as AnzeigeSide;
 
-        if (varNum !== etageNum) {
-            throw new Error(`Ungültiges Anzeige-Panel: anzeige_panel_${varNum} muss AnzeigePanel(etage_${varNum}) sein.`);
+        if (etageNumVar !== etageNumArg) {
+            throw new Error(
+                `AnzeigePanel für Etage ${etageNumVar}: Variablenname und Argument etage_<n> widersprechen sich.`
+            );
+        }
+        if (sideFromName !== sideFromArg) {
+            throw new Error(
+                `AnzeigePanel für Etage ${etageNumVar}: Variablenname-Seite (${sideFromName}) und Argument-Seite (${sideFromArg}) widersprechen sich.`
+            );
         }
 
-        checkEtageRange(etageNum, "etage");
+        checkEtageRange(etageNumVar, "anzeige", etageNumVar);
 
-        if (seen.has(etageNum)) {
-            throw new Error(`Doppelte Anzeige-Panel-Definition für Etage ${etageNum}.`);
+        if (!byEtage.has(etageNumVar)) byEtage.set(etageNumVar, new Set());
+        const set = byEtage.get(etageNumVar)!;
+        if (set.has(sideFromName)) {
+            throw new Error(
+                `AnzeigePanel Etage ${etageNumVar}: doppelte Seite "${sideFromName}".`
+            );
         }
-        seen.add(etageNum);
-        out.push(etageNum);
+        set.add(sideFromName);
     }
 
-    return { etagenMitAnzeige: out.sort((a, b) => a - b) };
+    const etagenMitAnzeige = Array.from(byEtage.entries())
+        .map(([etage, sides]) => ({
+            etage,
+            sides: Array.from(sides).sort((a, b) =>
+                a === b ? 0 : a === "left" ? -1 : 1
+            ),
+        }))
+        .sort((a, b) => a.etage - b.etage);
+
+    return { etagenMitAnzeige };
 }

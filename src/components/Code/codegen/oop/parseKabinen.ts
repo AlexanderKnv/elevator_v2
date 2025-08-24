@@ -1,117 +1,183 @@
-import type { Kabine } from "../../../../store/kabineSlice";
-import { stripHashComments, splitArgs } from "../../../../helpers/parsingHelper";
-import { checkEtageRange, ensureTargetNotEqualCurrent, ensureDirectionConsistent } from "../../../../helpers/validationHelper";
-import { toKabineState } from "../../../../helpers/kabineHelper";
+import type { Kabine, KabineSide } from "../../../../store/kabineSlice";
+import { stripHashComments } from "../../../../helpers/parsingHelper";
+import { checkEtageRange } from "../../../../helpers/validationHelper";
 
 export function parseOopKabinenCode(code: string): Kabine[] {
     const text = stripHashComments(code);
 
-    const instanceRe = /kabine_(\d+)\s*=\s*Kabine\s*\(([\s\S]*?)\)/g;
-    const kabinen: Kabine[] = [];
-    const seen = new Set<number>();
+    const re = /kabine_(left|right)\s*=\s*Kabine\s*\(\s*([\s\S]*?)\)/g;
+    const results: Kabine[] = [];
+    const usedSides = new Set<KabineSide>();
 
-    let match: RegExpExecArray | null;
-    while ((match = instanceRe.exec(text)) !== null) {
-        const idFromName = parseInt(match[1], 10);
-        if (seen.has(idFromName)) {
-            throw new Error(`Doppelte Kabinen-Definition für kabine_${idFromName}.`);
-        }
-        seen.add(idFromName);
+    let m: RegExpExecArray | null;
+    let blockIdx = 0;
 
-        const argsBody = match[2].trim();
-        const args = splitArgs(argsBody);
-        if (args.length !== 9) {
+    while ((m = re.exec(text)) !== null) {
+        blockIdx += 1;
+        const sideFromVar = m[1] as KabineSide;
+        const argsStr = m[2].trim();
+
+        const args = splitTopLevelArgs(argsStr);
+        if (args.length !== 10) {
             throw new Error(
-                `Kabine #${idFromName}: Erwartet 9 Argumente (id, current_etage, target_etage, is_moving, tuer_offen, call_queue, direction_movement, has_bedienpanel, aktive_ziel_etagen).`
+                `Kabine ${blockIdx}: Erwartet 10 Argumente im Aufruf Kabine(...), gefunden ${args.length}.`
             );
         }
 
-        // локальные парсеры значений
-        const etageVarRe = /^etage_(\d+)$/i;
+        const id = readQuoted(args[0], `Kabine ${blockIdx}: Feld "id" muss String sein (z.B. "kabine-left").`);
 
-        const parseIntStrict = (src: string, label: string): number => {
-            const t = src.trim();
-            const m = t.match(/^-?\d+$/);
-            if (!m) throw new Error(`Kabine #${idFromName}: Feld "${label}" muss eine ganze Zahl sein.`);
-            return parseInt(t, 10);
-        };
-
-        const parseBoolPy = (src: string, label: string): boolean => {
-            const t = src.trim();
-            if (/^True$/i.test(t)) return true;
-            if (/^False$/i.test(t)) return false;
-            throw new Error(`Kabine #${idFromName}: Feld "${label}" muss True|False sein.`);
-        };
-
-        const parseDir = (src: string, label: string): "up" | "down" | null => {
-            const t = src.trim();
-            if (/^None$/i.test(t)) return null;
-            const m = t.match(/^"(up|down)"$/);
-            if (!m) throw new Error(`Kabine #${idFromName}: Feld "${label}" muss "up"|"down"|None sein.`);
-            return m[1] as "up" | "down";
-        };
-
-        const parseEtageVar = (src: string, label: string): number => {
-            const t = src.trim();
-            const m = t.match(etageVarRe);
-            if (!m) throw new Error(`Kabine #${idFromName}: Feld "${label}" muss etage_<n> sein.`);
-            const num = parseInt(m[1], 10);
-            checkEtageRange(num, label, idFromName);
-            return num;
-        };
-
-        const parseEtageVarOrNone = (src: string, label: string): number | null => {
-            const t = src.trim();
-            if (/^None$/i.test(t)) return null;
-            return parseEtageVar(t, label);
-        };
-
-        const parseEtageVarArray = (src: string, label: string): number[] => {
-            const t = src.trim();
-            const m = t.match(/^\[\s*(.*?)\s*\]$/);
-            if (!m) {
-                throw new Error(
-                    `Kabine #${idFromName}: Feld "${label}" muss eine Liste von etage_<n> sein, z.B. [etage_1, etage_3].`
-                );
-            }
-            const body = m[1].trim();
-            if (!body) return [];
-            return body.split(",").map((s) => parseEtageVar(s.trim(), label));
-        };
-
-        // позиционные аргументы
-        const idArg = parseIntStrict(args[0], "id");
-        if (idArg !== idFromName) {
-            throw new Error(`Kabine #${idFromName}: "id" muss ${idFromName} sein (gemäß Variablennamen).`);
+        const sideStr = readQuoted(args[1], `Kabine ${blockIdx}: Feld "side" muss "left" oder "right" sein.`);
+        if (sideStr !== "left" && sideStr !== "right") {
+            throw new Error(`Kabine ${blockIdx}: Feld "side" muss "left" oder "right" sein (gefunden "${sideStr}").`);
         }
+        const side = sideStr as KabineSide;
 
-        const currentEtage = parseEtageVar(args[1], "current_etage");
-        const targetEtage = parseEtageVarOrNone(args[2], "target_etage");
-        ensureTargetNotEqualCurrent(targetEtage, currentEtage, idFromName);
+        if (side !== sideFromVar) {
+            throw new Error(
+                `Kabine ${blockIdx}: Variablenname "kabine_${sideFromVar}" widerspricht side="${side}".`
+            );
+        }
+        if (id !== `kabine-${side}`) {
+            throw new Error(
+                `Kabine ${blockIdx}: "id" muss "kabine-${side}" sein (gefunden "${id}").`
+            );
+        }
+        if (usedSides.has(side)) {
+            throw new Error(`Doppelte Kabine für Seite "${side}".`);
+        }
+        usedSides.add(side);
 
-        const isMoving = parseBoolPy(args[3], "is_moving");
-        const tuerOffen = parseBoolPy(args[4], "tuer_offen");
-        const callQueue = parseEtageVarArray(args[5], "call_queue");
-        const directionMovement = parseDir(args[6], "direction_movement");
-        const hasBedienpanel = parseBoolPy(args[7], "has_bedienpanel");
-        const aktiveZielEtagen = parseEtageVarArray(args[8], "aktive_ziel_etagen");
+        const currentEtage = readEtageVar(args[2], `Kabine ${blockIdx}: "current_etage" muss etage_<n> sein.`);
+        checkEtageRange(currentEtage, "current_etage", blockIdx);
 
-        ensureDirectionConsistent(directionMovement, currentEtage, targetEtage, idFromName);
+        const targetEtage = readEtageVarOrNone(args[3], `Kabine ${blockIdx}: "target_etage" muss None/null oder etage_<n> sein.`);
+        if (targetEtage !== null) checkEtageRange(targetEtage, "target_etage", blockIdx);
 
-        kabinen.push(
-            toKabineState({
-                idNum: idFromName,
-                currentEtage,
-                targetEtage,
-                isMoving,
-                doorsOpen: tuerOffen,
-                callQueue,
-                directionMovement,
-                hasBedienpanel,
-                aktiveZielEtagen,
-            })
-        );
+        const isMoving = readBool(args[4], `Kabine ${blockIdx}: "is_moving" muss True/False sein.`);
+
+        const doorsOpen = readBool(args[5], `Kabine ${blockIdx}: "tuer_offen" muss True/False sein.`);
+
+        const callQueue = readEtageVarArray(args[6], `Kabine ${blockIdx}: "call_queue" muss Liste von etage_<n> sein.`);
+        callQueue.forEach((n) => checkEtageRange(n, "call_queue", blockIdx));
+
+        const directionMovement = readDirection(args[7], `Kabine ${blockIdx}: "direction_movement" muss None/null oder "up"/"down" sein.`);
+
+        const hasBedienpanel = readBool(args[8], `Kabine ${blockIdx}: "has_bedienpanel" muss True/False sein.`);
+
+        const aktiveZielEtagen = readEtageVarArray(args[9], `Kabine ${blockIdx}: "aktive_ziel_etagen" muss Liste von etage_<n> sein.`);
+        aktiveZielEtagen.forEach((n) => checkEtageRange(n, "aktive_ziel_etagen", blockIdx));
+
+        results.push({
+            id,
+            side,
+            currentEtage,
+            targetEtage,
+            isMoving,
+            doorsOpen,
+            callQueue,
+            directionMovement,
+            hasBedienpanel,
+            aktiveZielEtagen,
+            doorsState: doorsOpen ? "open" : "closed",
+        });
     }
 
-    return kabinen;
+    if (results.length > 2) {
+        throw new Error(`Zu viele Kabinen gefunden (${results.length}). Maximal 2 (left & right).`);
+    }
+
+    return results.sort((a, b) => (a.side === b.side ? a.id.localeCompare(b.id) : a.side === "left" ? -1 : 1));
+}
+
+function splitTopLevelArgs(s: string): string[] {
+    const out: string[] = [];
+    let cur = "";
+    let depth = 0;
+    let inStr = false;
+    let quote: '"' | "'" | null = null;
+
+    for (let i = 0; i < s.length; i++) {
+        const ch = s[i];
+
+        if (inStr) {
+            cur += ch;
+            if (ch === quote && s[i - 1] !== "\\") {
+                inStr = false;
+                quote = null;
+            }
+            continue;
+        }
+
+        if (ch === '"' || ch === "'") {
+            inStr = true;
+            quote = ch as '"' | "'";
+            cur += ch;
+            continue;
+        }
+
+        if (ch === "[") { depth++; cur += ch; continue; }
+        if (ch === "]") { depth--; cur += ch; continue; }
+
+        if (ch === "," && depth === 0) {
+            if (cur.trim() !== "") out.push(cur.trim());
+            cur = "";
+            continue;
+        }
+
+        cur += ch;
+    }
+
+    if (cur.trim() !== "") out.push(cur.trim());
+    return out;
+}
+
+function readQuoted(token: string, err: string): string {
+    const m = token.match(/^\s*"(.*)"\s*$/s) || token.match(/^\s*'(.*)'\s*$/s);
+    if (!m) throw new Error(err);
+    return m[1];
+}
+
+function readBool(token: string, err: string): boolean {
+    const v = token.trim();
+    if (/^(True|true)$/.test(v)) return true;
+    if (/^(False|false)$/.test(v)) return false;
+    throw new Error(err);
+}
+
+function readEtageVar(token: string, err: string): number {
+    const m = token.trim().match(/^etage_(\d+)$/i);
+    if (!m) throw new Error(err);
+    return parseInt(m[1], 10);
+}
+
+function readEtageVarOrNone(token: string, err: string): number | null {
+    const t = token.trim();
+    if (/^(None|null)$/i.test(t)) return null;
+    return readEtageVar(t, err);
+}
+
+function readEtageVarArray(token: string, err: string): number[] {
+    const t = token.trim();
+    const m = t.match(/^\[(.*)\]$/s);
+    if (!m) throw new Error(err);
+    const inner = m[1].trim();
+    if (inner === "") return [];
+    const parts = splitTopLevelArgs(inner);
+    const out: number[] = [];
+    const seen = new Set<number>();
+    for (const p of parts) {
+        const n = readEtageVar(p, err);
+        if (seen.has(n)) throw new Error(`${err} (Duplikat etage_${n}).`);
+        seen.add(n);
+        out.push(n);
+    }
+    return out;
+}
+
+function readDirection(token: string, err: string): "up" | "down" | null {
+    const t = token.trim();
+    if (/^(None|null)$/i.test(t)) return null;
+    const m = t.match(/^"(up|down)"$/i) || t.match(/^'(up|down)'$/i);
+    if (!m) throw new Error(err);
+    return m[1].toLowerCase() as "up" | "down";
 }

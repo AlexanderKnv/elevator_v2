@@ -45,8 +45,13 @@ const schachtSlice = createSlice({
                 );
             }
         },
+        resetSchacht: (state, action: PayloadAction<SchachtState>) => {
+            state.etagenMitSchacht = action.payload.etagenMitSchacht
+                .map(e => ({ etage: e.etage, sides: Array.from(new Set(e.sides)) as SchachtSide[] }))
+                .sort((a, b) => a.etage - b.etage);
+        },
     },
 });
 
-export const { addSchachtToEtage, removeSchachtFromEtage } = schachtSlice.actions;
+export const { addSchachtToEtage, removeSchachtFromEtage, resetSchacht } = schachtSlice.actions;
 export default schachtSlice.reducer;

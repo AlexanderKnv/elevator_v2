@@ -1,6 +1,7 @@
 import './SchachtZone.css';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../../store/store';
+import type { Kabine } from '../../../store/kabineSlice';
 
 type SchachtZoneProps = {
     etageNumber: number;
@@ -9,7 +10,7 @@ type SchachtZoneProps = {
 
 const SchachtZone: React.FC<SchachtZoneProps> = ({ etageNumber, side }) => {
 
-    const kabine = useSelector((state: RootState) => state.kabine.kabinen[0]);
+    const kabine = useSelector((state: RootState) => state.kabine.kabinen.find((k: Kabine) => k.side === side));
 
     const doorsOpenHere = kabine && kabine.currentEtage === etageNumber && kabine.doorsOpen === true;
 

@@ -1,10 +1,10 @@
 import { etageVar } from "../../../../helpers/renderHelper";
-import type { AnzeigeState } from "../../../../store/anzeigeSlice ";
+import type { SchachtState } from "../../../../store/schachtSlice";
 
-export function generateImperativAnzeigeCode(state: AnzeigeState): string {
+export function generateImperativSchachtCode(state: SchachtState): string {
     const bySide = { left: new Set<number>(), right: new Set<number>() } as const;
 
-    for (const entry of state?.etagenMitAnzeige ?? []) {
+    for (const entry of state?.etagenMitSchacht ?? []) {
         for (const s of entry.sides ?? []) {
             if (s === "left" || s === "right") bySide[s].add(entry.etage);
         }
@@ -15,12 +15,10 @@ export function generateImperativAnzeigeCode(state: AnzeigeState): string {
 
     if (left.length === 0 && right.length === 0) return "";
 
-    const fmt = (arr: number[]) =>
-        arr.length ? `[${arr.map(etageVar).join(", ")}]` : "[]";
+    const fmt = (arr: number[]) => (arr.length ? `[${arr.map(etageVar).join(", ")}]` : "[]");
 
-    const lines: string[] = [];
-    lines.push(`anzeige_left  = ${fmt(left)}`);
-    lines.push(`anzeige_right = ${fmt(right)}`);
-
-    return lines.join("\n");
+    return [
+        `schacht_left  = ${fmt(left)}`,
+        `schacht_right = ${fmt(right)}`,
+    ].join("\n");
 }

@@ -17,9 +17,8 @@ type EtageVisualProps = {
 export const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
     const dispatch = useDispatch<AppDispatch>();
     const allEtagen = useSelector((state: RootState) => state.etage.etagen);
-    const kabine = useSelector((state: RootState) => state.kabine.kabinen[0]);
+    const kabinen = useSelector((state: RootState) => state.kabine.kabinen);
     const aktiveRuftasten = useSelector((state: RootState) => state.ruftaste.aktiveRuftasten);
-    const anzeigeEtagen = useSelector((s: RootState) => s.anzeige.etagenMitAnzeige);
 
     const hasLeftSchacht = useSelector((s: RootState) => {
         const entry = s.schacht.etagenMitSchacht.find(e => e.etage === etageNumber);
@@ -31,7 +30,16 @@ export const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
     });
 
 
-    const hasAnzeige = anzeigeEtagen.includes(etageNumber);
+    const hasLeftAnzeige = useSelector((s: RootState) => {
+        const entry = s.anzeige.etagenMitAnzeige.find(e => e.etage === etageNumber);
+        return !!entry && entry.sides.includes('left');
+    });
+
+    const hasRightAnzeige = useSelector((s: RootState) => {
+        const entry = s.anzeige.etagenMitAnzeige.find(e => e.etage === etageNumber);
+        return !!entry && entry.sides.includes('right');
+    });
+
     const isActive = (callDirection: 'up' | 'down') =>
         aktiveRuftasten.some(
             (entry) => entry.etage === etageNumber && entry.callDirection === callDirection
@@ -46,16 +54,19 @@ export const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
     );
 
     const handleClick = (callDirection: 'up' | 'down') => {
-        if (kabine.currentEtage === etageNumber && (kabine.doorsState === 'opening' || kabine.doorsState === 'closing')) {
-            return;
-        }
+        const anyCabHereBusy = kabinen.some(
+            (k) =>
+                k.currentEtage === etageNumber &&
+                (k.doorsState === 'opening' || k.doorsState === 'closing')
+        );
+        if (anyCabHereBusy) return;
         dispatch(activateRuftaste({ etage: etageNumber, callDirection }));
         dispatch(moveKabineToEtage(etageNumber));
     };
 
     const handleDrop = (side: 'left' | 'right', itemType: string | symbol | null) => {
         if (itemType === 'KABINE') {
-            dispatch(addKabine({ etage: 1 }));
+            dispatch(addKabine({ etage: 1, side }));
         }
         if (itemType === 'RUFTASTE') {
             dispatch(addRuftasteToEtage(etageNumber));
@@ -64,7 +75,7 @@ export const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
             dispatch(addSchachtToEtage({ etage: etageNumber, side }));
         }
         if (itemType === 'ANZEIGE') {
-            dispatch(addAnzeigeToEtage(etageNumber));
+            dispatch(addAnzeigeToEtage({ etage: etageNumber, side }));
         }
     };
 
@@ -114,7 +125,7 @@ export const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
             <div className="etageCircle">{etageNumber}</div>
 
             <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }}>
-                {/* Полноэкранная зона для RUFTASTE */}
+                {/* Vollbildbereich für RUFTASTE */}
                 <div
                     ref={dropFullRef as unknown as React.Ref<HTMLDivElement>}
                     style={{
@@ -128,7 +139,7 @@ export const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
                         transition: 'background-color 120ms ease',
                     }}
                 />
-                {/* Две половинки для KABINE/SCHACHT/ANZEIGE */}
+                {/* Zweigeteiltes Layout (50/50) für KABINE/SCHACHT/ANZEIGE */}
                 <div style={{ position: 'absolute', inset: 0, display: 'flex' }}>
                     <div
                         ref={dropLeftRef as unknown as React.Ref<HTMLDivElement>}
@@ -181,7 +192,8 @@ export const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
             {hasLeftSchacht && <SchachtZone etageNumber={etageNumber} side="left" />}
             {hasRightSchacht && <SchachtZone etageNumber={etageNumber} side="right" />}
 
-            {hasAnzeige && <AnzeigeZone />}
+            {hasLeftAnzeige && <AnzeigeZone side="left" />}
+            {hasRightAnzeige && <AnzeigeZone side="right" />}
         </div>
     );
 };

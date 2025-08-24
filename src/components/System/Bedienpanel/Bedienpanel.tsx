@@ -2,12 +2,17 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../../../store/store';
 import { addCallToQueue, addZielEtage, } from '../../../store/kabineSlice';
-// import Icon from '../../../assets/icon-elevator.png';
 import './Bedienpanel.css';
 
-const Bedienpanel: React.FC = () => {
+type BedienpanelProps = {
+    side: 'left' | 'right';
+};
+
+const Bedienpanel: React.FC<BedienpanelProps> = ({ side }) => {
     const etagen = useSelector((state: RootState) => state.etage.etagen);
-    const kabine = useSelector((state: RootState) => state.kabine.kabinen[0]);
+    const kabine = useSelector((state: RootState) =>
+        state.kabine.kabinen.find(k => k.side === side)
+    );
     const dispatch = useDispatch();
 
     const zielEtagen = kabine?.aktiveZielEtagen || [];
@@ -18,13 +23,9 @@ const Bedienpanel: React.FC = () => {
         if (!kabine) return;
         if (etage === kabine.currentEtage) return;
         if (zielEtagen.includes(etage)) return;
-        dispatch(addCallToQueue(etage));
-        dispatch(addZielEtage(etage));
+        dispatch(addCallToQueue({ side, etage }));
+        dispatch(addZielEtage({ side, etage }));
     };
-
-    // const handleDoorToggle = () => {
-    //     dispatch(openDoors());
-    // };
 
     return (
         <div className="bedienpanel">
@@ -37,9 +38,6 @@ const Bedienpanel: React.FC = () => {
                     {etage}
                 </button>
             ))}
-            {/* <button onClick={handleDoorToggle} className="bedienpanel-button door-toggle">
-                <img src={Icon} alt="Icon-elevator" className="elevator-icon" />
-            </button> */}
         </div>
     );
 };

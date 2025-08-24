@@ -1,17 +1,22 @@
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
 import './AnzeigeZone.css';
+import type { Kabine } from "../../../store/kabineSlice";
 
-const AnzeigeZone: React.FC = () => {
+type AnzeigeZoneProps = {
+    side: 'left' | 'right';
+};
+
+const AnzeigeZone: React.FC<AnzeigeZoneProps> = ({ side }) => {
     const etagenMitAnzeige = useSelector((s: RootState) => s.anzeige.etagenMitAnzeige);
-    const kabine = useSelector((s: RootState) => s.kabine.kabinen[0]);
+    const kabine = useSelector((state: RootState) => state.kabine.kabinen.find((k: Kabine) => k.side === side));
     const etagen = useSelector((state: RootState) => state.etage.etagen);
 
     if (etagen.length === 0 || etagenMitAnzeige.length === 0) return null;
 
     return (
         <div className="anzeige-zone">
-            <div className="anzeige-panel">
+            <div className={`anzeige-panel ${side}`}>
                 <div className="anzeige-floor">{kabine?.currentEtage ?? '-'}</div>
                 <div className="anzeige-direction">
                     {kabine?.callQueue
