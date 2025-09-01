@@ -24,6 +24,22 @@ const release = (etage: number, dirs: HallDir[] = ['up', 'down']) => {
     for (const d of dirs) hallClaims.delete(hallKey(etage, d));
 };
 
+const allTimeouts = new Set<ReturnType<typeof setTimeout>>();
+
+export function setT(fn: () => void, ms: number) {
+    const id = setTimeout(() => {
+        allTimeouts.delete(id);
+        fn();
+    }, ms) as ReturnType<typeof setTimeout>;
+
+    allTimeouts.add(id);
+    return id;
+}
+
+export function clearAllTimeouts() {
+    for (const id of allTimeouts) clearTimeout(id);
+    allTimeouts.clear();
+}
 
 export const processNextCall = (side: KabineSide) => (dispatch: AppDispatch, getState: () => any) => {
     const state = getState();
@@ -37,22 +53,14 @@ export const processNextCall = (side: KabineSide) => (dispatch: AppDispatch, get
     const zielEtagen: number[] = state.kabine.kabinen.find((k: Kabine) => k.side === side)?.aktiveZielEtagen ?? [];
     const internalSet = new Set(zielEtagen);
 
-    // Andere Kabine – weiches Deduplizieren anhand ihrer Warteschlange
-    const otherSide: KabineSide = side === 'left' ? 'right' : 'left';
-    const otherKabine = state.kabine.kabinen.find((k: Kabine) => k.side === otherSide);
-    const reservedByOther = new Set<number>([
-        ...(otherKabine?.callQueue ?? []),
-        ...(otherKabine?.aktiveZielEtagen ?? []),
-    ]);
-
     // Hallrufe (Claims + Busy-Status der anderen Kabine berücksichtigen)
     const allHall = (state.ruftaste.aktiveRuftasten ?? []) as { etage: number; callDirection: 'up' | 'down' }[];
+
     const aktiveRuftasten = allHall.filter(r => {
         const claimed = hallClaims.get(hallKey(r.etage, r.callDirection));
-        const freeOrMine = !claimed || claimed === side;
-        const notOtherReserved = !reservedByOther.has(r.etage);
-        return freeOrMine && notOtherReserved;
+        return !claimed || claimed === side;
     });
+
     const hallUp = new Set(aktiveRuftasten.filter(r => r.callDirection === 'up').map(r => r.etage));
     const hallDown = new Set(aktiveRuftasten.filter(r => r.callDirection === 'down').map(r => r.etage));
 
@@ -102,30 +110,35 @@ export const processNextCall = (side: KabineSide) => (dispatch: AppDispatch, get
 
     // Soll hier gehalten werden?
     const shouldStopHere = (dir: Direction) => {
-        const internalHere = internalSet.has(currentEtage);
-        const hallHere = dir
-            ? (dir === 'up' ? hallUp.has(currentEtage) : hallDown.has(currentEtage))
-            : (hallUp.has(currentEtage) || hallDown.has(currentEtage));
+        if (internalSet.has(currentEtage)) return true;
 
-        if (internalHere) return true; // Interne Ziele werden ohne Claim verarbeitet
+        const other = state.kabine.kabinen.find((k: Kabine) => k.side !== side);
+        if (other && other.currentEtage === currentEtage && other.doorsState !== 'closed') return false;
 
-        if (hallHere) {
-            const dirsToClaim: HallDir[] = [];
-            if (!dir || dir === 'up') { if (hallUp.has(currentEtage)) dirsToClaim.push('up'); }
-            if (!dir || dir === 'down') { if (hallDown.has(currentEtage)) dirsToClaim.push('down'); }
-            if (dirsToClaim.length > 0 && canClaim(side, currentEtage, dirsToClaim)) {
-                claim(side, currentEtage, dirsToClaim);
-                return true;
-            }
+        const hallHereDirs = (allHall
+            .filter(r => r.etage === currentEtage)
+            .map(r => r.callDirection as 'up' | 'down'));
+
+        const claimable = hallHereDirs.filter(d => {
+            const cl = hallClaims.get(hallKey(currentEtage, d));
+            return !cl || cl === side;
+        });
+
+        if (claimable.length > 0) {
+            claim(side, currentEtage, claimable);
+            if (dir) dispatch(setDirectionMovement({ side, direction: null }));
+            return true;
         }
-        return false;
+
+        if (!dir) return hallUp.has(currentEtage) || hallDown.has(currentEtage);
+        return dir === 'up' ? hallUp.has(currentEtage) : hallDown.has(currentEtage);
     };
 
     if (shouldStopHere(directionMovement)) {
         dispatch(openDoors({ side }));
         dispatch(setDoorsState({ side, state: 'opening' }));
-        setTimeout(() => { dispatch(openDoors({ side })); dispatch(setDoorsState({ side, state: 'closing' })); }, 5000);
-        setTimeout(() => {
+        setT(() => { dispatch(openDoors({ side })); dispatch(setDoorsState({ side, state: 'closing' })); }, 5000);
+        setT(() => {
             dispatch(setDoorsState({ side, state: 'closed' }));
             dispatch(deactivateRuftaste({ etage: currentEtage, callDirection: 'up' }));
             dispatch(deactivateRuftaste({ etage: currentEtage, callDirection: 'down' }));
@@ -180,7 +193,7 @@ export const processNextCall = (side: KabineSide) => (dispatch: AppDispatch, get
     if (hallDown.has(nextEtage)) dirsToClaimAtNext.push('down');
     if (dirsToClaimAtNext.length > 0 && !canClaim(side, nextEtage, dirsToClaimAtNext)) {
         // Etage bereits von der anderen Kabine geclaimt → Plan neu bewerten.
-        setTimeout(() => dispatch(processNextCall(side)), 0);
+        setT(() => dispatch(processNextCall(side)), 0);
         return;
     }
     if (dirsToClaimAtNext.length > 0) {
@@ -193,13 +206,13 @@ export const processNextCall = (side: KabineSide) => (dispatch: AppDispatch, get
     dispatch(setTargetEtage({ side, etage: nextEtage }));
 
     if (Math.abs(dif) > 1) {
-        setTimeout(() => {
+        setT(() => {
             dispatch(setCurrentEtage({ side, etage: 2 }));
             dif = 0;
-        }, 5000)
+        }, 5000);
     }
 
-    setTimeout(() => {
+    setT(() => {
         dispatch(completeMovement({ side }));
 
         // Ankunftsetage: offene Anforderungen/Claims für diese Etage zurücksetzen
@@ -212,8 +225,8 @@ export const processNextCall = (side: KabineSide) => (dispatch: AppDispatch, get
 
         dispatch(openDoors({ side }));
         dispatch(setDoorsState({ side, state: 'opening' }));
-        setTimeout(() => { dispatch(openDoors({ side })); dispatch(setDoorsState({ side, state: 'closing' })); }, 5000);
-        setTimeout(() => {
+        setT(() => { dispatch(openDoors({ side })); dispatch(setDoorsState({ side, state: 'closing' })); }, 5000);
+        setT(() => {
             dispatch(setDoorsState({ side, state: 'closed' }));
             const s = getState();
             const hasZiel = (s.kabine.kabinen.find((k: Kabine) => k.side === side)?.aktiveZielEtagen ?? []).length > 0;

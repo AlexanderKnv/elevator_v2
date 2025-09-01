@@ -22,7 +22,6 @@ export function parseDeklarativAnzeigeCode(code: string): AnzeigeState {
     objs.forEach((obj, i) => {
         const idx = i + 1;
 
-        // etage (обяз.)
         const mEt = obj.match(/"etage"\s*:\s*(-?\d+)/);
         if (!mEt) {
             throw new Error(`Anzeige #${idx}: Feld "etage" fehlt oder ist ungültig (Zahl erwartet).`);
@@ -35,7 +34,6 @@ export function parseDeklarativAnzeigeCode(code: string): AnzeigeState {
         }
         seenEtagen.add(etage);
 
-        // sides (обяз.)
         const mSides = obj.match(/"sides"\s*:\s*\[([\s\S]*?)\]/);
         if (!mSides) {
             throw new Error(`Anzeige #${idx}: Feld "sides" fehlt oder ist ungültig (Liste erwartet).`);
@@ -57,7 +55,6 @@ export function parseDeklarativAnzeigeCode(code: string): AnzeigeState {
                     return m[1] as AnzeigeSide;
                 });
 
-        // проверки sides
         const uniqSides = Array.from(new Set(sides));
         if (uniqSides.length !== sides.length) {
             throw new Error(`Anzeige #${idx}: "sides" enthält Duplikate.`);
@@ -66,13 +63,11 @@ export function parseDeklarativAnzeigeCode(code: string): AnzeigeState {
             throw new Error(`Anzeige #${idx}: "sides" darf höchstens 2 Einträge haben.`);
         }
 
-        // финальная нормализация порядка
         uniqSides.sort((a, b) => (a === b ? 0 : a === "left" ? -1 : 1));
 
         result.push({ etage, sides: uniqSides });
     });
 
-    // стаб. сортировка по этажам
     result.sort((a, b) => a.etage - b.etage);
     return { etagenMitAnzeige: result };
 }

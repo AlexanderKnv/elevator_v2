@@ -5,7 +5,7 @@ import { type RootState } from '../../../store/store';
 import { addEtage } from '../../../store/etageSlice';
 import EtageVisual from './EtageVisual';
 
-const MAX_ETAGEN = 3;
+export const MAX_ETAGEN = 3;
 
 const EtageZone: React.FC = () => {
     const dispatch = useDispatch();
