@@ -38,9 +38,38 @@
     padding: 4px 8px;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: transform 0.4s ease;
 }
 
 .run-button:hover {
     background-color: rgb(82, 180, 82);
+    transform: scale(1.05);
+}
+
+.icon-btn {
+    border: 1px solid #555;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: #cccccc;
+    transition: transform 0.4s ease;
+    width: 30px;
+    height: 30px;
+    padding: 3px 0 0 0;
+}
+
+.icon-btn:hover {
+    background-color: #fff;
+    transform: scale(1.05);
+}
+
+.icon-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+.btn-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
 }

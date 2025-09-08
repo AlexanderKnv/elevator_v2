@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../../store/store';
 import Bedienpanel from '../Bedienpanel/Bedienpanel';
 import { useDrop } from 'react-dnd';
-import { addBedienpanelToKabine } from '../../../store/kabineSlice';
+import { addBedienpanelToKabine, removeKabine } from '../../../store/kabineSlice';
 
 type KabinenZoneProps = {
     side: 'left' | 'right';
@@ -41,6 +41,12 @@ const KabinenZone: React.FC<KabinenZoneProps> = ({ side }) => {
 
     const opacity = kabine.isMoving ? 0.2 : 1;
 
+    const handleRemoveKabine = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
+        e.preventDefault();
+        dispatch(removeKabine({ side }));
+    };
+
     return (
         <div
             className={`lift-cabin ${side}`}
@@ -52,6 +58,12 @@ const KabinenZone: React.FC<KabinenZoneProps> = ({ side }) => {
                 opacity: `${opacity}`,
             }}
         >
+            <button
+                className="kabine-remove"
+                onClick={handleRemoveKabine}
+            >
+                ×
+            </button>
             <div className={`door left ${kabine.doorsOpen ? 'open' : ''}`} />
             <div className={`door right ${kabine.doorsOpen ? 'open' : ''}`} />
             {kabine.hasBedienpanel && <Bedienpanel side={side} />}

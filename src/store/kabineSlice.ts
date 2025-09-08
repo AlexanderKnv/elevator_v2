@@ -144,6 +144,7 @@ export const kabineSlice = createSlice({
 
 export const {
     addKabine,
+    removeKabine,
     resetKabinen,
     setTargetEtage,
     completeMovement,

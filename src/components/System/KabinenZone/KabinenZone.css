@@ -42,3 +42,34 @@
 .door.right.open {
     transform: translateX(100%);
 }
+
+.kabine-remove {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 9999px;
+    background: rgba(220, 0, 0, 0.95);
+    color: #fff;
+    font-size: 16px;
+    line-height: 22px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity .4s ease, transform .4s ease, filter .3s ease, box-shadow .3s ease;
+    pointer-events: none;
+    cursor: pointer;
+    z-index: 12;
+}
+
+.lift-cabin:hover .kabine-remove {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}

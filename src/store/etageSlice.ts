@@ -18,11 +18,14 @@ export const etageSlice = createSlice({
                 state.etagen.push(newEtage);
             }
         },
+        removeEtage: (state, action: PayloadAction<number>) => {
+            state.etagen = state.etagen.filter((nr) => nr !== action.payload);
+        },
         resetEtagen: (state, action: PayloadAction<number[]>) => {
             state.etagen = action.payload;
         },
     },
 });
 
-export const { addEtage, resetEtagen } = etageSlice.actions;
+export const { addEtage, removeEtage, resetEtagen } = etageSlice.actions;
 export default etageSlice.reducer;

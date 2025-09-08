@@ -25,6 +25,7 @@
     height: 50px;
     background-color: #444;
     width: 100%;
+    pointer-events: auto;
 }
 
 .elevator-structure {
@@ -39,6 +40,7 @@
     border: 2px solid #555;
     flex-shrink: 0;
     overflow: hidden;
+    pointer-events: auto;
 }
 
 .elevator-doors {
@@ -71,4 +73,34 @@
 
 .right-door.open {
     transform: translateX(100%);
+}
+
+.schacht-remove {
+    position: absolute;
+    top: -4%;
+    right: -6%;
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 9999px;
+    background: rgba(220, 0, 0, 0.95);
+    color: #fff;
+    font-size: 16px;
+    line-height: 22px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity .4s ease, transform .4s ease, filter .3s ease, box-shadow .3s ease;
+    pointer-events: none;
+    cursor: pointer;
+}
+
+.elevator-framing:hover .schacht-remove {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
 }

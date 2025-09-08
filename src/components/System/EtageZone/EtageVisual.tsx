@@ -3,12 +3,13 @@ import { useDrop } from 'react-dnd';
 import { useDispatch, useSelector } from 'react-redux';
 import { addKabine } from '../../../store/kabineSlice';
 import { type AppDispatch, type RootState } from '../../../store/store';
-import { activateRuftaste, addRuftasteToEtage } from '../../../store/ruftasteSlice';
+import { activateRuftaste, addRuftasteToEtage, removeRuftastenForEtage } from '../../../store/ruftasteSlice';
 import { moveKabineToEtage } from '../KabinenZone/kabineThunks';
 import { addSchachtToEtage } from '../../../store/schachtSlice';
 import SchachtZone from '../SchachtZone/SchachtZone';
 import { addAnzeigeToEtage } from '../../../store/anzeigeSlice ';
 import AnzeigeZone from '../AnzeigeZone/AnzeigeZone';
+import { removeEtage } from '../../../store/etageSlice';
 
 type EtageVisualProps = {
     etageNumber: number;
@@ -120,9 +121,28 @@ export const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
     const halvesActive = draggingType !== null && draggingType !== 'RUFTASTE';
     const fullActive = draggingType === 'RUFTASTE';
 
+    const handleRemove = (etageNr: number) => (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
+        e.preventDefault();
+        dispatch(removeRuftastenForEtage(etageNr));
+    };
+
+    const handleRemoveEtage = (etageNr: number) => (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
+        e.preventDefault();
+        dispatch(removeEtage(etageNr));
+    };
+
     return (
         <div className="etage-visual" style={{ position: 'relative' }}>
             <div className="etageCircle">{etageNumber}</div>
+
+            <button
+                className="etage-remove"
+                onClick={handleRemoveEtage(etageNumber)}
+            >
+                ×
+            </button>
 
             <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }}>
                 {/* Vollbildbereich für RUFTASTE */}
@@ -170,6 +190,12 @@ export const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
 
             {ruftasteAktiv && (
                 <div className="ruf-buttons">
+                    <button
+                        className="ruftaste-remove"
+                        onClick={handleRemove(etageNumber)}
+                    >
+                        ×
+                    </button>
                     {etageNumber !== highestEtage && (
                         <button
                             className={`ruf-button up ${isActive('up') ? 'active' : ''}`}
@@ -192,8 +218,8 @@ export const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
             {hasLeftSchacht && <SchachtZone etageNumber={etageNumber} side="left" />}
             {hasRightSchacht && <SchachtZone etageNumber={etageNumber} side="right" />}
 
-            {hasLeftAnzeige && <AnzeigeZone side="left" />}
-            {hasRightAnzeige && <AnzeigeZone side="right" />}
+            {hasLeftAnzeige && <AnzeigeZone side="left" etageNumber={etageNumber} />}
+            {hasRightAnzeige && <AnzeigeZone side="right" etageNumber={etageNumber} />}
         </div>
     );
 };
