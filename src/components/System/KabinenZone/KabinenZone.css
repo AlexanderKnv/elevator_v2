@@ -6,7 +6,7 @@
     display: flex;
     overflow: hidden;
     z-index: 5;
-    transition: top 5s ease;
+    /* transition: top 5s ease; */
     margin-top: 10%;
 }
 
@@ -21,7 +21,7 @@
 .door {
     width: 50%;
     background-color: #ccc;
-    transition: transform 5s ease-in-out;
+    /* transition: transform 5s ease-in-out; */
     z-index: 10;
 }
 

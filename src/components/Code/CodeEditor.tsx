@@ -16,6 +16,7 @@ import pasteIcon from "../../assets/icons-paste.png";
 import copyIcon from "../../assets/icons-copy.png";
 import cutIcon from "../../assets/icons-cut.png";
 import deleteIcon from "../../assets/icons-delete.png";
+import { resetGlobals } from '../../store/globalsSlice';
 
 export default function CodeEditor() {
     const etagen = useSelector((state: RootState) => state.etage.etagen);
@@ -23,26 +24,30 @@ export default function CodeEditor() {
     const ruftasten = useSelector((state: RootState) => state.ruftaste);
     const anzeige = useSelector((s: RootState) => s.anzeige);
     const schacht = useSelector((s: RootState) => s.schacht);
+    const globals = useSelector((s: RootState) => s.globals);
     const [style, setStyle] = useState<CodeStyle>('Imperativ');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [code, setCode] = useState('');
     const dispatch = useDispatch();
 
     useEffect(() => {
-        setCode(generateCode(style, etagen, kabinen, ruftasten, anzeige, schacht));
-    }, [style, etagen, kabinen, ruftasten, anzeige, schacht]);
+        setCode(generateCode(style, etagen, kabinen, ruftasten, anzeige, schacht, globals));
+    }, [style, etagen, kabinen, ruftasten, anzeige, schacht, globals]);
 
     const handleRun = () => {
         setErrorMessage(null);
         try {
             const {
+                globals: parsedGlobals,
                 etagen: parsedEtagen,
                 kabinen: parsedKabinen,
                 ruftasten: parsedRuftasten,
                 anzeige: parsedAnzeige,
                 schacht: parsedSchacht,
             } = parseCode(style, code);
-
+            if (parsedGlobals) {
+                dispatch(resetGlobals(parsedGlobals));
+            }
             dispatch(resetEtagen(parsedEtagen));
             dispatch(resetKabinen(parsedKabinen));
             dispatch(resetRuftasten(parsedRuftasten));

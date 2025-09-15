@@ -18,14 +18,18 @@ import type { SchachtState } from '../../../store/schachtSlice';
 import { parseDeklarativSchachtCode } from './deklarativ/parseSchacht';
 import { parseImperativSchachtCode } from './imperativ/parseSchacht';
 import { parseOopSchachtCode } from './oop/parseSchacht';
+import type { GlobalsState } from '../../../store/globalsSlice';
+import { parseGlobalsCode } from './global/parseGlobalsCode';
 
 export function parseCode(
     style: CodeStyle,
     code: string
-): { etagen: number[]; kabinen: Kabine[]; ruftasten: RuftasteState, anzeige: AnzeigeState, schacht: SchachtState } {
+): { globals: Partial<GlobalsState> | null; etagen: number[]; kabinen: Kabine[]; ruftasten: RuftasteState, anzeige: AnzeigeState, schacht: SchachtState } {
+    const globals = parseGlobalsCode(code);
     switch (style) {
         case 'Deklarativ':
             return {
+                globals,
                 etagen: parseDeklarativEtagenCode(code),
                 kabinen: parseDeklarativKabinenCode(code),
                 ruftasten: parseDeklarativRuftasteCode(code),
@@ -34,6 +38,7 @@ export function parseCode(
             };
         case 'Imperativ':
             return {
+                globals,
                 etagen: parseImperativEtagenCode(code),
                 kabinen: parseImperativKabinenCode(code),
                 ruftasten: parseImperativRuftasteCode(code),
@@ -42,6 +47,7 @@ export function parseCode(
             };
         case 'OOP':
             return {
+                globals,
                 etagen: parseOopEtagenCode(code),
                 kabinen: parseOopKabinenCode(code),
                 ruftasten: parseOopRuftasteCode(code),
@@ -50,6 +56,7 @@ export function parseCode(
             };
         default:
             return {
+                globals: null,
                 etagen: [],
                 kabinen: [],
                 ruftasten: { etagenMitRuftasten: [], aktiveRuftasten: [] },

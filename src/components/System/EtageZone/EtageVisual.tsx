@@ -9,7 +9,7 @@ import { addSchachtToEtage } from '../../../store/schachtSlice';
 import SchachtZone from '../SchachtZone/SchachtZone';
 import { addAnzeigeToEtage } from '../../../store/anzeigeSlice ';
 import AnzeigeZone from '../AnzeigeZone/AnzeigeZone';
-import { removeEtage } from '../../../store/etageSlice';
+import { removeEtageCascade } from './removeEtageCascade';
 
 type EtageVisualProps = {
     etageNumber: number;
@@ -130,7 +130,7 @@ export const EtageVisual: React.FC<EtageVisualProps> = ({ etageNumber }) => {
     const handleRemoveEtage = (etageNr: number) => (e: React.MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();
         e.preventDefault();
-        dispatch(removeEtage(etageNr));
+        dispatch(removeEtageCascade(etageNr));
     };
 
     return (

@@ -44,6 +44,9 @@ export function clearAllTimeouts() {
 export const processNextCall = (side: KabineSide) => (dispatch: AppDispatch, getState: () => any) => {
     const state = getState();
     const kabine = state.kabine.kabinen.find((k: Kabine) => k.side === side);
+    const doorTimeMs = state.globals.doorTimeMs;
+    const speedMs = state.globals.speedMs;
+
     const uniq = (arr: number[]) => Array.from(new Set(arr));
     if (!kabine || kabine.isMoving) return;
 
@@ -137,7 +140,7 @@ export const processNextCall = (side: KabineSide) => (dispatch: AppDispatch, get
     if (shouldStopHere(directionMovement)) {
         dispatch(openDoors({ side }));
         dispatch(setDoorsState({ side, state: 'opening' }));
-        setT(() => { dispatch(openDoors({ side })); dispatch(setDoorsState({ side, state: 'closing' })); }, 5000);
+        setT(() => { dispatch(openDoors({ side })); dispatch(setDoorsState({ side, state: 'closing' })); }, doorTimeMs);
         setT(() => {
             dispatch(setDoorsState({ side, state: 'closed' }));
             dispatch(deactivateRuftaste({ etage: currentEtage, callDirection: 'up' }));
@@ -149,7 +152,7 @@ export const processNextCall = (side: KabineSide) => (dispatch: AppDispatch, get
             const hasZiel = (s.kabine.kabinen.find((k: Kabine) => k.side === side)?.aktiveZielEtagen ?? []).length > 0;
             const hasHall = (s.ruftaste.aktiveRuftasten ?? []).length > 0;
             if (hasZiel || hasHall) dispatch(processNextCall(side)); else dispatch(setDirectionMovement({ side, direction: null }));
-        }, 10000);
+        }, (doorTimeMs * 2));
         return;
     }
 
@@ -201,7 +204,7 @@ export const processNextCall = (side: KabineSide) => (dispatch: AppDispatch, get
     }
 
     let dif = Math.abs(nextEtage - currentEtage);
-    const travelDuration = dif * 5000;
+    const travelDuration = dif * speedMs;
 
     dispatch(setTargetEtage({ side, etage: nextEtage }));
 
@@ -209,7 +212,7 @@ export const processNextCall = (side: KabineSide) => (dispatch: AppDispatch, get
         setT(() => {
             dispatch(setCurrentEtage({ side, etage: 2 }));
             dif = 0;
-        }, 5000);
+        }, speedMs);
     }
 
     setT(() => {
@@ -225,13 +228,13 @@ export const processNextCall = (side: KabineSide) => (dispatch: AppDispatch, get
 
         dispatch(openDoors({ side }));
         dispatch(setDoorsState({ side, state: 'opening' }));
-        setT(() => { dispatch(openDoors({ side })); dispatch(setDoorsState({ side, state: 'closing' })); }, 5000);
+        setT(() => { dispatch(openDoors({ side })); dispatch(setDoorsState({ side, state: 'closing' })); }, doorTimeMs);
         setT(() => {
             dispatch(setDoorsState({ side, state: 'closed' }));
             const s = getState();
             const hasZiel = (s.kabine.kabinen.find((k: Kabine) => k.side === side)?.aktiveZielEtagen ?? []).length > 0;
             const hasHall = (s.ruftaste.aktiveRuftasten ?? []).length > 0;
             if (hasZiel || hasHall) dispatch(processNextCall(side)); else dispatch(setDirectionMovement({ side, direction: null }));
-        }, 10000);
+        }, (doorTimeMs * 2));
     }, travelDuration);
 };

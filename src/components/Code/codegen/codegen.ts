@@ -1,4 +1,5 @@
 import type { AnzeigeState } from '../../../store/anzeigeSlice ';
+import type { GlobalsState } from '../../../store/globalsSlice';
 import type { Kabine } from '../../../store/kabineSlice';
 import type { RuftasteState } from '../../../store/ruftasteSlice';
 import type { SchachtState } from '../../../store/schachtSlice';
@@ -7,6 +8,7 @@ import { generateDeklarativEtagenCode } from './deklarativ/etagen';
 import { generateDeklarativKabinenCode } from './deklarativ/kabinen';
 import { generateDeklarativRuftasteCode } from './deklarativ/ruftasten';
 import { generateDeklarativSchachtCode } from './deklarativ/schacht';
+import { generateGlobalsCode } from './global/generateGlobalsCode';
 import { generateImperativAnzeigeCode } from './imperativ/anzeige';
 import { generateImperativEtagenCode } from './imperativ/etagen';
 import { generateImperativKabinenCode } from './imperativ/kabinen';
@@ -26,7 +28,8 @@ export function generateCode(
     kabinen: Kabine[],
     ruftasten: RuftasteState,
     anzeige: AnzeigeState,
-    schacht: SchachtState
+    schacht: SchachtState,
+    globals: GlobalsState,
 ): string {
     const WELCOME_LINE =
         'print("Willkommen in der Aufzugssimulation – viel Spaß beim Lernen!")';
@@ -70,7 +73,9 @@ export function generateCode(
             break;
     }
 
-    const codeBody = [etagenCode, kabinenCode, ruftastenCode, anzeigenCode, schachtCode].filter(Boolean).join('\n\n');
+    const globalsCode = generateGlobalsCode(globals, kabinen);
+
+    const codeBody = [globalsCode, etagenCode, kabinenCode, ruftastenCode, anzeigenCode, schachtCode].filter(Boolean).join('\n\n');
 
     return codeBody.trim() === '' ? WELCOME_LINE : codeBody;
 }

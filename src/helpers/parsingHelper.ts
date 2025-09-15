@@ -71,3 +71,8 @@ export function splitArgs(argsBody: string): string[] {
     if (buf.trim()) out.push(buf.trim());
     return out;
 }
+
+export function readIntAssign(line: string, name: string): number | null {
+    const m = line.match(new RegExp(`^\\s*${name}\\s*=\\s*(\\d+)\\b`));
+    return m ? parseInt(m[1], 10) : null;
+}

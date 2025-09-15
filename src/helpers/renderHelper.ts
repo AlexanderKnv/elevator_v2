@@ -10,3 +10,6 @@ export const etageVar = (n: number) => `etage_${n}`;
 export const etageVarOrNone = (n: number | null | undefined) => (n == null ? "None" : etageVar(n));
 export const etageVarArray = (nums: number[]) => `[${nums.map(etageVar).join(", ")}]`;
 export const pyNoneOrQuoted = (s: string | null | undefined) => (s == null ? "None" : `"${s}"`);
+
+export const renderGlobals = (speedMs: number, doorTimeMs: number) =>
+    `SPEED = ${speedMs}\nDOOR_TIME = ${doorTimeMs}`;

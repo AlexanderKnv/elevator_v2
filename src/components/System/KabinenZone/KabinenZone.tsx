@@ -13,6 +13,9 @@ type KabinenZoneProps = {
 const KabinenZone: React.FC<KabinenZoneProps> = ({ side }) => {
     const kabine = useSelector((state: RootState) => state.kabine.kabinen.find(k => k.side === side));
     const totalEtagen = useSelector((state: RootState) => state.etage.etagen.length);
+    const speedMs = useSelector((state: RootState) => state.globals.speedMs);
+    const doorTimeMs = useSelector((state: RootState) => state.globals.doorTimeMs);
+
     const dispatch = useDispatch();
 
     const [{ }, dropRef] = useDrop(() => ({
@@ -36,7 +39,7 @@ const KabinenZone: React.FC<KabinenZoneProps> = ({ side }) => {
     }
 
     const travelDuration = kabine?.targetEtage != null
-        ? Math.abs(kabine.currentEtage - kabine.targetEtage) * 5
+        ? Math.abs(kabine.currentEtage - kabine.targetEtage) * (speedMs / 1000)
         : 0;
 
     const opacity = kabine.isMoving ? 0.2 : 1;
@@ -64,8 +67,8 @@ const KabinenZone: React.FC<KabinenZoneProps> = ({ side }) => {
             >
                 ×
             </button>
-            <div className={`door left ${kabine.doorsOpen ? 'open' : ''}`} />
-            <div className={`door right ${kabine.doorsOpen ? 'open' : ''}`} />
+            <div style={{ transition: `transform ${doorTimeMs / 1000}s ease-in-out` }} className={`door left ${kabine.doorsOpen ? 'open' : ''}`} />
+            <div style={{ transition: `transform ${doorTimeMs / 1000}s ease-in-out` }} className={`door right ${kabine.doorsOpen ? 'open' : ''}`} />
             {kabine.hasBedienpanel && <Bedienpanel side={side} />}
         </div>
     );

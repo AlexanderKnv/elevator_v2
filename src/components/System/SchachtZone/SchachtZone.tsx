@@ -10,6 +10,8 @@ type SchachtZoneProps = {
 };
 
 const SchachtZone: React.FC<SchachtZoneProps> = ({ etageNumber, side }) => {
+    const doorTimeMs = useSelector((state: RootState) => state.globals.doorTimeMs);
+
     const dispatch = useDispatch<AppDispatch>();
 
     const kabine = useSelector((state: RootState) => state.kabine.kabinen.find((k: Kabine) => k.side === side));
@@ -35,8 +37,8 @@ const SchachtZone: React.FC<SchachtZoneProps> = ({ etageNumber, side }) => {
                 <div className="elevator-structure">
                     <div className="side-panel left-panel"></div>
                     <div className="elevator-doors">
-                        <div className={`door left-door ${doorsOpenHere ? 'open' : ''}`}></div>
-                        <div className={`door right-door ${doorsOpenHere ? 'open' : ''}`}></div>
+                        <div style={{ transition: `transform ${doorTimeMs / 1000}s ease-in-out` }} className={`door left-door ${doorsOpenHere ? 'open' : ''}`}></div>
+                        <div style={{ transition: `transform ${doorTimeMs / 1000}s ease-in-out` }} className={`door right-door ${doorsOpenHere ? 'open' : ''}`}></div>
                     </div>
                     <div className="side-panel right-panel"></div>
                 </div>

@@ -20,6 +20,9 @@ export const etageSlice = createSlice({
         },
         removeEtage: (state, action: PayloadAction<number>) => {
             state.etagen = state.etagen.filter((nr) => nr !== action.payload);
+            state.etagen = state.etagen
+                .sort((a, b) => a - b)
+                .map((_, i) => i + 1);
         },
         resetEtagen: (state, action: PayloadAction<number[]>) => {
             state.etagen = action.payload;
