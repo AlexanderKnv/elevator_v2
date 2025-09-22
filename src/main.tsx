@@ -1,3 +1,12 @@
+/** @packageDocumentation
+ * Haupteinstiegspunkt der Anwendung.
+ * - Initialisiert die React-Root.
+ * - Aktiviert zusätzliche Prüfungen im Entwicklungsmodus mit `<StrictMode>`.
+ * - Stellt den globalen Zustand über `<Provider store={store}>` bereit (Redux Toolkit).
+ * - Aktiviert Drag-and-Drop mit `<DndProvider backend={HTML5Backend}>`.
+ * - Rendert die Hauptkomponente `<App />` in das DOM-Element mit der ID `root`.
+ */
+
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'

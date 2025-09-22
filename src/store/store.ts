@@ -1,3 +1,14 @@
+/** @packageDocumentation
+ * # Globaler Redux-Store (`store.ts`)
+ *
+ * Zentrale Zustandsverwaltung der Anwendung mit **Redux Toolkit**.
+ *
+ * - Erstellt den Store.
+ * - Registriert die Slice-Reducer: `etage`, `kabine`, `ruftaste`, `schacht`, `anzeige`, `globals`.
+ * - Exportiert typsichere Hilfstypen: `RootState` (Gesamtzustand) und `AppDispatch` (Dispatch-Typ).
+ */
+
+
 import { configureStore } from '@reduxjs/toolkit';
 import etageReducer from './etageSlice';
 import kabineReducer from './kabineSlice';

@@ -10,9 +10,9 @@ export function parseGlobalsCode(code: string): GlobalsState | null {
     let door: number | null = null;
 
     for (const l of lines) {
-        const m1 = l.match(/^SPEED\s*=\s*(\d+)\b/);
+        const m1 = l.match(/^Kabinen_Wartezeit\s*=\s*(\d+)\b/);
         if (m1) speed = parseInt(m1[1], 10);
-        const m2 = l.match(/^DOOR_TIME\s*=\s*(\d+)\b/);
+        const m2 = l.match(/^Tür_Öffnungs_Zeit\s*=\s*(\d+)\b/);
         if (m2) door = parseInt(m2[1], 10);
     }
 
@@ -21,8 +21,8 @@ export function parseGlobalsCode(code: string): GlobalsState | null {
     const check = (v: number, name: string) => {
         if (v < 100 || v > 60000) throw new Error(`${name} außerhalb des Bereichs (100..60000 ms).`);
     };
-    if (speed != null) check(speed, "SPEED");
-    if (door != null) check(door, "DOOR_TIME");
+    if (speed != null) check(speed, "Kabinen_Wartezeit");
+    if (door != null) check(door, "Tür_Öffnungs_Zeit");
 
     return {
         speedMs: speed ?? undefined as unknown as number,

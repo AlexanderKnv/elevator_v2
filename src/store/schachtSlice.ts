@@ -1,3 +1,15 @@
+/** @packageDocumentation
+ * # Schacht-Slice (`schachtSlice.ts`)
+ *
+ * Zustandsverwaltung für Schachtseiten je Etage eines Aufzugs.
+ *
+ * - Hält eine Liste von Etagen (`etage`) mit zugehörigen Schachtseiten (`sides`).
+ * - `addSchachtToEtage` fügt eine Seite hinzu, vermeidet Duplikate und begrenzt auf max. **2** Seiten.
+ * - `removeSchachtFromEtage` entfernt eine Seite; leere Etagen-Einträge werden automatisch gelöscht.
+ * - `resetSchacht` ersetzt den Zustand aus einer Payload, **entdoppelt** Seiten und **sortiert** nach Etage (aufsteigend).
+ */
+
+
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 export type SchachtSide = 'left' | 'right';

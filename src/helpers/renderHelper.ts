@@ -12,4 +12,4 @@ export const etageVarArray = (nums: number[]) => `[${nums.map(etageVar).join(", 
 export const pyNoneOrQuoted = (s: string | null | undefined) => (s == null ? "None" : `"${s}"`);
 
 export const renderGlobals = (speedMs: number, doorTimeMs: number) =>
-    `SPEED = ${speedMs}\nDOOR_TIME = ${doorTimeMs}`;
+    `Kabinen_Wartezeit = ${speedMs}\nTür_Öffnungs_Zeit = ${doorTimeMs}`;

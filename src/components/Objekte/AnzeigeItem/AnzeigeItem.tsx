@@ -1,3 +1,13 @@
+/** @packageDocumentation
+ * # Anzeige-Item (Drag Source) (`AnzeigeItem.tsx`)
+ *
+ * Draggable-Element zum Platzieren einer **Anzeige**.
+ *
+ * - Initialisiert eine Drag-Quelle mit `useDrag` (Typ: `'ANZEIGE'`).
+ * - Übergibt eine leere Payload (`item: {}`); Kontext wird von der Drop-Zone bestimmt.
+ * - Gibt visuelles Feedback über die Deckkraft (`opacity 0.5`), solange gezogen wird.
+ */
+
 import React from 'react';
 import './AnzeigeItem.css';
 import AnzeigeImage from '../../../assets/Anzeige.jpg';

@@ -1,3 +1,25 @@
+/** @packageDocumentation
+ * # Kabinenaufruf-Thunk (`moveKabineToEtage`)
+ *
+ * Steuert den Aufzugsaufruf zu einer Ziel-Etage und verteilt ihn ggf. auf die passende Kabine.
+ *
+ * - Fügt bei Bedarf einen Etagenruf zur Queue der passenden Kabine hinzu (`addCallToQueue`).
+ * - Startet die Abarbeitung der Queue (`processNextCall`), wenn eine Kabine frei ist.
+ * - Unterstützt Ein- **und** Zwei-Kabinen-Szenarien (Seiten: `'left'` / `'right'`).
+ *
+ * **Logik im Überblick**
+ * - **0 Kabinen** → beendet ohne Aktion.
+ * - **1 Kabine** → Ruf enqueuen.
+ * - **2 Kabinen**:
+ *   - Beide frei **und** beide **auf Ziel-Etage** → enqueuen (links, falls neu) → `processNextCall('left')`.
+ *   - Beide frei, **gleiche Etage ≠ Ziel** → enqueuen (links) → `processNextCall('left')`.
+ *   - Beide frei, **unterschiedliche Etagen** → wähle die **nähere** Kabine per Distanzvergleich (`dL`/`dR`).
+ *   - Nur **links** frei → links; nur **rechts** frei → rechts.
+ *   - Beide **belegt** → keine Aktion.
+ * - Schutz vor Doppel-Queue über beide Kabinen mittels `alreadyQueuedAcross`.
+ */
+
+
 import type { AppDispatch } from '../../../store/store';
 import { addCallToQueue, type Kabine, type KabineSide } from '../../../store/kabineSlice';
 import { processNextCall } from './processNextCall';

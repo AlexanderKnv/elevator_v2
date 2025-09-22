@@ -1,3 +1,13 @@
+/** @packageDocumentation
+ * # Anzeige-Zone (`AnzeigeZone.tsx`)
+ *
+ * Anzeige-/Statuspanel für eine bestimmte Etage und Schachtseite (links/rechts).
+ *
+ * - Zeigt die aktuelle Etage der passenden Kabine (`kabine.currentEtage`).
+ * - Visualisiert die Bewegungsrichtung der Kabine (`▲` / `▼`).
+ * - Ermöglicht das Entfernen der Anzeige über die Schließen-Schaltfläche.
+ */
+
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../../store/store";
 import './AnzeigeZone.css';
