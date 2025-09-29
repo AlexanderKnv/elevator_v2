@@ -1,3 +1,12 @@
+/** @packageDocumentation
+ * # OOP-Generator: Schacht (`generateOopSchachtCode`)
+ *
+ * - Definiert die Python-Klasse `SchachtPanel(etage, side)`.
+ * - Sortiert Einträge nach `etage` und ordnet `sides` deterministisch: `"left"` vor `"right"`.
+ * - Erzeugt pro (Etage, Seite) eine Instanzzeile: `schacht_panel_<etage>_<side> = SchachtPanel(etage_<n>, "<side>")`.
+ * - Verwendet `etageVar(n)` zur Ausgabe als `etage_<n>` und liefert Klassendefinition + Instanzen als zusammenhängenden String.
+ */
+
 import { etageVar } from "../../../../helpers/renderHelper";
 import type { SchachtState } from "../../../../store/schachtSlice";
 

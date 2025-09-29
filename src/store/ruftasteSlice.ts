@@ -1,3 +1,19 @@
+/** @packageDocumentation
+ * # Ruftasten-Slice (`ruftasteSlice.ts`)
+ *
+ * Verwaltung der **Ruftasten** pro Etage eines Aufzugs:
+ * - Welche Etagen besitzen Ruftasten?
+ * - Welche Ruftasten sind aktuell **aktiv** (gedrückt) und in **welcher Richtung** (`'up' | 'down'`)?
+ *
+ * **Aufgaben**
+ * - `addRuftasteToEtage(etage)` registriert Ruftasten-Hardware auf einer Etage (ohne Duplikate).
+ * - `activateRuftaste({ etage, callDirection })` aktiviert eine bestimmte Ruftaste (einzigartige Kombination).
+ * - `deactivateRuftaste({ etage, callDirection })` deaktiviert die Kombination (entfernt sie aus der Liste).
+ * - `removeRuftastenForEtage(etage)` entfernt die Ruftasten-Zuordnung einer Etage.
+ * - `resetRuftasten(payload)` ersetzt den Zustand, **sortiert** Etagen aufsteigend und
+ *   ordnet aktive Ruftasten stabil: zuerst `'up'`, dann `'down'`.
+ */
+
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 export type Richtung = 'up' | 'down';

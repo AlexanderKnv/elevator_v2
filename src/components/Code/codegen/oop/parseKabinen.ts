@@ -1,3 +1,18 @@
+/** @packageDocumentation
+ * # OOP-Parser: Kabinen (`parseOopKabinenCode`)
+ *
+ * - Entfernt `#`-Kommentare und findet Blöcke `kabine_(left|right) = Kabine(...)`.
+ * - Zerlegt die Argumentliste robust mit `splitTopLevelArgs` (beachtet Klammer-Tiefe `[]`, Strings, Kommas auf Top-Level); erwartet **genau 10** Argumente.
+ * - Liest/prüft Felder:
+ *   - `id` (String) und `side` (`"left"|"right"`), erzwingt `id === "kabine-<side>"`, verbietet doppelte Seiten.
+ *   - `current_etage = etage_<n>` (1..3), `target_etage = None|null|etage_<n>` (1..3), Konsistenz via `checkEtageRange`.
+ *   - `is_moving`, `tuer_offen` als `True|False` (case-insensitive).
+ *   - `call_queue`, `aktive_ziel_etagen` als `[etage_<n>, ...]` ohne Duplikate, alle Werte 1..3.
+ *   - `direction_movement = None|null|"up"|"down"`.
+ * - Baut `Kabine`-Objekte und leitet `doorsState` aus `tuer_offen` ab (`open`/`closed`); maximal **2** Kabinen erlaubt.
+ * - Sortiert Ergebnis deterministisch: `side` (left vor right), dann `id`.
+ */
+
 import type { Kabine, KabineSide } from "../../../../store/kabineSlice";
 import { stripHashComments } from "../../../../helpers/parsingHelper";
 import { checkEtageRange } from "../../../../helpers/validationHelper";

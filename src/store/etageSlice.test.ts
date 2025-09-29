@@ -1,3 +1,31 @@
+/** @packageDocumentation
+ * # Tests: Etage-Slice (`etageSlice.spec.ts`)
+ *
+ * - Initialzustand:
+ *   - Eingabe: `etageReducer(undefined, { type: '@@INIT' })`
+ *   - Erwartung: `{ etagen: [] }`
+ *
+ * - `addEtage` — fügt erste Etage hinzu, wenn leer:
+ *   - Eingabe: Startzustand → `addEtage()`
+ *   - Erwartung: `etagen = [1]`
+ *
+ * - `addEtage` — sequentiell bis max. drei Etagen:
+ *   - Eingabe: dreimal `addEtage()` nacheinander
+ *   - Erwartung: `etagen = [1, 2, 3]`
+ *
+ * - `addEtage` — überschreitet Limit 3 nicht (No-Op ab viertem Aufruf):
+ *   - Eingabe: nach `etagen = [1,2,3]` erneut `addEtage()`
+ *   - Erwartung: Zustand **unverändert** (`[1,2,3]`)
+ *
+ * - `resetEtagen` — setzt Liste exakt auf Payload:
+ *   - Eingabe: `resetEtagen([3, 1, 1, 2])`
+ *   - Erwartung: `etagen = [3, 1, 1, 2]` (keine Deduplizierung/Sortierung)
+ *
+ * - `addEtage` nach `resetEtagen` — neue ID richtet sich nach **Länge**, nicht nach Maximalwert:
+ *   - Eingabe: `resetEtagen([10,20])` → danach `addEtage()`
+ *   - Erwartung: `etagen = [10, 20, 3]`
+ */
+
 import etageReducer, { addEtage, resetEtagen } from "../store/etageSlice";
 import { describe, it, expect } from "vitest";
 

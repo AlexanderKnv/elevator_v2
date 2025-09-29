@@ -1,3 +1,17 @@
+/** @packageDocumentation
+ * # Imperativ-Parser: Kabinen (`parseImperativKabinenCode`)
+ *
+ * - Entfernt `#`-Kommentare und parst Variablenblöcke `kabine_1_*` / `kabine_2_*`.
+ * - Liest Pflichtfelder: `id`, `side`, `current_etage`, `target_etage`, `is_moving`, `tuer_offen`,
+ *   `call_queue`, `direction_movement`, `has_bedienpanel`, `aktive_ziel_etagen`.
+ * - Validiert `side ∈ {"left","right"}` und erzwingt `id === "kabine-<side>"`; verhindert doppelte Seiten.
+ * - Prüft Etagen-Tokens `etage_<n>` und Wertebereich **1–3**; validiert Listen und vermeidet Duplikate.
+ * - Akzeptiert `target_etage = None|null|etage_<n>`; `direction_movement = None|null|"up"|"down"`.
+ * - Interpretiert Booleans als `True|False` (case-insensitive).
+ * - Leitet `doorsState` aus `tuer_offen` ab (`open`/`closed`) und baut vollständige `Kabine`-Objekte.
+ * - Sortiert das Ergebnis deterministisch: `side` (left vor right), dann `id`.
+ */
+
 import type { Kabine, KabineSide } from "../../../../store/kabineSlice";
 import { stripHashComments } from "../../../../helpers/parsingHelper";
 import { checkEtageRange } from "../../../../helpers/validationHelper";

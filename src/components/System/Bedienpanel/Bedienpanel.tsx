@@ -1,3 +1,12 @@
+/** @packageDocumentation
+ * # Bedienpanel (`Bedienpanel.tsx`)
+ *
+ * - Rendert Etagenknöpfe in absteigender Reihenfolge.
+ * - Ignoriert Klicks auf die aktuelle Etage und bereits aktive Ziele.
+ * - Fügt bei gültigem Klick einen Ruf zur Queue hinzu und markiert die Ziel-Etage.
+ * - Rendert nur, wenn die zugehörige Kabine existiert und ein Bedienpanel besitzt.
+ */
+
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../../../store/store';
@@ -43,4 +52,3 @@ const Bedienpanel: React.FC<BedienpanelProps> = ({ side }) => {
 };
 
 export default Bedienpanel;
-

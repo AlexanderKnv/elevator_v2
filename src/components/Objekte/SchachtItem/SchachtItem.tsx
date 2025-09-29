@@ -1,3 +1,12 @@
+/** @packageDocumentation
+ * # Schacht-Item (`SchachtItem.tsx`)
+ *
+ * - Initialisiert eine Drag-Quelle mit `useDrag` (Typ: `'SCHACHT'`, ohne Payload).
+ * - Bindet `dragRef` am Wurzel-Element und reduziert die Deckkraft während des Drag-Vorgangs.
+ * - Rendert Bild und Beschriftung über `.schacht-image` und `.schacht-label`.
+ * - Dient als reines Palette-/Trigger-Element; die eigentliche Platzierung erfolgt in den Drop-Zonen.
+ */
+
 import './SchachtItem.css';
 import { useDrag } from 'react-dnd';
 import SchachtImage from '../../../assets/Schacht.jpg';
@@ -12,8 +21,7 @@ const SchachtItem: React.FC = () => {
 
     return (
         <div
-            //@ts-ignore
-            ref={dragRef}
+            ref={dragRef as unknown as React.Ref<HTMLDivElement>}
             className="schacht-item"
             style={{ opacity: isDragging ? 0.5 : 1 }}
         >

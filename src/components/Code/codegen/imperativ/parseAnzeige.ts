@@ -1,3 +1,13 @@
+/** @packageDocumentation
+ * # Imperativ-Parser: Anzeige (`parseImperativAnzeigeCode`)
+ *
+ * - Parst Zeilen der Form `anzeige_left = [etage_1, ...]` und `anzeige_right = [etage_2, ...]` (case-insensitive).
+ * - Entfernt `#`-Kommentare, extrahiert die Etagen als Tokens `etage_<n>` und validiert jeden Wert (`1..3`) ohne Duplikate je Seite.
+ * - Sortiert die Etagen pro Seite aufsteigend und führt sie etagenweise zu Sides-Mengen zusammen.
+ * - Ordnet Sides je Etage deterministisch (`left` vor `right`) und sortiert das Ergebnis nach Etagennummer.
+ * - Gibt `{ etagenMitAnzeige }` zurück; wirft verständliche Fehler bei falschem Token-Format oder doppelten Einträgen.
+ */
+
 import { stripHashComments } from "../../../../helpers/parsingHelper";
 import { checkEtageRange } from "../../../../helpers/validationHelper";
 import type { AnzeigeSide, AnzeigeState } from "../../../../store/anzeigeSlice ";

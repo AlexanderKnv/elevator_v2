@@ -1,6 +1,16 @@
+/** @packageDocumentation
+ * # Globals-Parser (`parseGlobalsCode`)
+ *
+ * - Entfernt zuerst `#`-Kommentare und zerlegt den Eingabetext in Zeilen.
+ * - Liest Zuweisungen `Kabinen_Wartezeit = <int>` und `Tür_Öffnungs_Zeit = <int>` (Millisekunden).
+ * - Validiert jeden gefundenen Wert auf den Bereich **100..60000 ms** (außerhalb → Fehler).
+ * - Gibt `null` zurück, wenn **keiner** der beiden Parameter gefunden wurde.
+ * - Gibt sonst ein `GlobalsState` mit den **gefundenen** Feldern zurück (nicht gefundene bleiben unverändert).
+ * - Mehrfache Vorkommen derselben Zuweisung: die **letzte** gefundene gilt.
+ */
+
 import { stripHashComments } from "../../../../helpers/parsingHelper";
 import type { GlobalsState } from "../../../../store/globalsSlice";
-
 
 export function parseGlobalsCode(code: string): GlobalsState | null {
     const text = stripHashComments(code);

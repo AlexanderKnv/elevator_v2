@@ -1,3 +1,14 @@
+/** @packageDocumentation
+ * # Imperativ-Generator: Schacht (`generateImperativSchachtCode`)
+ *
+ * - Aggregiert Etagen pro Seite aus `state.etagenMitSchacht` in zwei Mengen (**left**, **right**) ohne Duplikate.
+ * - Sortiert beide Etagenlisten aufsteigend; gibt `""` zurück, wenn beide leer sind.
+ * - Formatiert die Ausgabe im Imperativ-/Variablenstil:
+ *   `schacht_left  = [etage_1, etage_3]` und `schacht_right = [etage_2]` (oder `[]`).
+ * - Verwendet `etageVar(n)` zur Darstellung als `etage_<n>`; liefert genau zwei Zeilen, getrennt durch `\n`.
+ * - Robust gegen `null/undefined` durch Fallback `state?.etagenMitSchacht ?? []`.
+ */
+
 import { etageVar } from "../../../../helpers/renderHelper";
 import type { SchachtState } from "../../../../store/schachtSlice";
 

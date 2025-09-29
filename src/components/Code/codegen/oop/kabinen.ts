@@ -1,3 +1,13 @@
+/** @packageDocumentation
+ * # OOP-Generator: Kabinen (`generateOopKabinenCode`)
+ *
+ * - Sortiert die Kabinen deterministisch via `sortKabinenById`.
+ * - Definiert eine Python-Klasse `Kabine` mit vollständigem `__init__(...)`.
+ * - Erzeugt pro Eintrag eine Instanz: `kabine_<side> = Kabine("id", "side", etage_<n>, etage_<n>|None, True/False, True/False, [etage_*], "up"|"down"|None, True/False, [etage_*])`.
+ * - Verwendet Formatter: `etageVar`, `etageVarOrNone`, `pyBoolTF`, `etageVarArray`, `pyNoneOrQuoted`.
+ * - Gibt Klassendefinition + Instanzzuweisungen als zusammenhängenden String zurück (Blöcke durch Leerzeile getrennt).
+ */
+
 import type { Kabine } from "../../../../store/kabineSlice";
 import { sortKabinenById } from "../../../../helpers/kabineHelper";
 import { pyBoolTF, etageVar, etageVarOrNone, etageVarArray, pyNoneOrQuoted } from "../../../../helpers/renderHelper";

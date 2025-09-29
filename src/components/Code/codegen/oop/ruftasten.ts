@@ -1,3 +1,11 @@
+/** @packageDocumentation
+ * # OOP-Generator: Ruftasten (`generateOopRuftasteCode`)
+ *
+ * - Erzeugt optional die Klasse `RuftastenPanel` und Instanzen `panel_<n> = RuftastenPanel(etage_<n>)` (entdoppelt, aufsteigend sortiert).
+ * - Erzeugt optional die Klasse `AktiverRuf` und Instanzen `aktiver_ruf_<i> = AktiverRuf(panel_<n>, "up"|"down")`.
+ * - Verwendet `etageVar(n)` zur Ausgabe als `etage_<n>` und verbindet Klassendefinitionen + Instanzen als String.
+ */
+
 import type { Richtung } from "../../../../store/ruftasteSlice";
 import { etageVar } from "../../../../helpers/renderHelper";
 

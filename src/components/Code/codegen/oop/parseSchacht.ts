@@ -1,3 +1,14 @@
+/** @packageDocumentation
+ * # OOP-Parser: Schacht (`parseOopSchachtCode`)
+ *
+ * - Entfernt `#`-Kommentare und parst Zuweisungen: `schacht_panel_<etage>_<side> = SchachtPanel(etage_<etage>, "<side>")`.
+ * - Prüft Konsistenz zwischen Variablennamen und Argumenten (gleiche `<etage>` und `<side>`).
+ * - Validiert den Etagenbereich (1–3) via `checkEtageRange`.
+ * - Verhindert doppelte Seiten pro Etage (z. B. zweimal `"left"` auf derselben Etage).
+ * - Aggregiert zu `{ etage, sides }[]`, ordnet `sides` deterministisch (`left` vor `right`) und sortiert nach Etage.
+ * - Gibt `{ etagenMitSchacht }` zurück.
+ */
+
 import { stripHashComments } from "../../../../helpers/parsingHelper";
 import { checkEtageRange } from "../../../../helpers/validationHelper";
 import type { SchachtState, SchachtSide } from "../../../../store/schachtSlice";

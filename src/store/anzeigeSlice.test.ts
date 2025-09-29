@@ -1,3 +1,39 @@
+/** @packageDocumentation
+ * # Tests: Anzeige-Slice (`anzeigeSlice.spec.ts`)
+ *  
+ * - Initialzustand:
+ *   - Eingabe: `anzeigeReducer(undefined, { type: '@@INIT' })`
+ *   - Erwartung: `{ etagenMitAnzeige: [] }`
+ *
+ * - `addAnzeigeToEtage` — neuer Eintrag, wenn keiner existiert:
+ *   - Eingabe: Startzustand → `addAnzeigeToEtage({ etage: 1, side: 'left' })`
+ *   - Erwartung: Eintrag für Etage **1** mit `sides: ['left']` (Länge = 1)
+ *
+ * - `addAnzeigeToEtage` — zweite Seite + Duplikat verhindern:
+ *   - Eingabe: `addAnzeigeToEtage({ etage: 2, side: 'left' })`, dann `addAnzeigeToEtage({ etage: 2, side: 'right' })`, anschließend erneut `'right'`
+ *   - Erwartung: Für Etage **2** exakt `['left','right']`; dritter Aufruf **ändert nichts**
+ *
+ * - `addAnzeigeToEtage` — nie mehr als 2 Seiten:
+ *   - Eingabe: auf Etage **3** nacheinander `'left'`, `'right'`, erneut `'left'`
+ *   - Erwartung: weiterhin genau `['left','right']`; zusätzlicher Aufruf ist **No-Op**
+ *
+ * - `removeAnzeigeFromEtage` — Seite entfernen, Eintrag ggf. löschen:
+ *   - Eingabe: Etage **5** mit `['left','right']`; entferne `'right'`, dann `'left'`
+ *   - Erwartung: nach erstem Entfernen `['left']`; nach zweitem Entfernen **kein** Eintrag mehr
+ *
+ * - `removeAnzeigeFromEtage` — No-Op bei fehlender Etage/Seite:
+ *   - Eingabe: Zustand mit Etage **7** `'left'`; entferne `'right'`; danach entferne `'left'` auf **42**
+ *   - Erwartung: **keine** Zustandsänderung in beiden Fällen
+ *
+ * - `resetAnzeige` (Array-Payload):
+ *   - Eingabe: `resetAnzeige([3,1,1,2])`
+ *   - Erwartung: Etagen **[1,2,3]** (entdoppelt & sortiert), jede mit `sides: ['left']`
+ *
+ * - `resetAnzeige` (Voll-State-Payload):
+ *   - Eingabe: `resetAnzeige({ etagenMitAnzeige: [{ etage: 2, sides: ['right','left','left'] }, { etage: 1, sides: ['left'] }] })`
+ *   - Erwartung: sortiert nach Etage → **1**, **2**; für **1** `['left']`, für **2** `['left','right']` (Duplikate entfernt)
+ */
+
 import { describe, it, expect } from "vitest";
 import anzeigeReducer, { addAnzeigeToEtage, removeAnzeigeFromEtage, resetAnzeige } from './anzeigeSlice ';
 

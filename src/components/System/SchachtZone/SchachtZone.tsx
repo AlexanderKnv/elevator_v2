@@ -1,3 +1,15 @@
+/** @packageDocumentation
+ * # Schacht-Zone (`SchachtZone.tsx`)
+ *
+ * Visualisierung eines Fahrstuhlschachts für eine Etage und Seite (links/rechts).
+ *
+ * - Liest `doorTimeMs` aus `globals` und setzt daraus die CSS-Transition-Dauer der Türflügel.
+ * - Ermittelt die Kabine der angegebenen Seite und berechnet `doorsOpenHere` (Kabine steht auf `etageNumber` **und** `doorsOpen === true`).
+ * - Rendert Rahmen/Struktur des Schachts.
+ * - Animiert linke/rechte Tür (`.left-door`, `.right-door`) über `transition` und toggelt die Klasse `.open` basierend auf `doorsOpenHere`.
+ * - Zeigt einen Entfernen-Button („×“) und dispatcht `removeSchachtFromEtage({ etage, side })`.
+ */
+
 import './SchachtZone.css';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../../store/store';

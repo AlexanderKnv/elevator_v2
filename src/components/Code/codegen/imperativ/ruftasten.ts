@@ -1,3 +1,12 @@
+/** @packageDocumentation
+ * # Imperativ-Generator: Ruftasten (`generateImperativRuftasteCode`)
+ *
+ * - Entdoppelt und sortiert `etagenMitRuftasten` aufsteigend und gibt `ruftasten_etagen = [etage_<n>, ...]` aus.
+ * - Normalisiert und sortiert `aktiveRuftasten`: nach Etage, innerhalb `'up'` vor `'down'`; formatiert als
+ *   `aktive_ruftasten = [ { "etage": etage_<n>, "call_direction": "up"|"down" }, ... ]`.
+ * - Trennt die beiden Blöcke mit einer Leerzeile; gibt einen **Leerstring** zurück, wenn beide Eingabelisten leer sind.
+ */
+
 import type { Richtung } from "../../../../store/ruftasteSlice";
 import { etageVar, etageVarArray } from "../../../../helpers/renderHelper";
 

@@ -1,3 +1,13 @@
+/** @packageDocumentation
+ * # Imperativ-Parser: Schacht (`parseImperativSchachtCode`)
+ *
+ * - Entfernt `#`-Kommentare und liest `schacht_left = [...]` / `schacht_right = [...]`.
+ * - Parst Etagen-Tokens `etage_<n>`; validiert Bereich **1–3** und verhindert Duplikate je Seite.
+ * - Führt beide Seiten etagenweise zusammen; ordnet Sides deterministisch (`left` vor `right`).
+ * - Sortiert das Ergebnis nach Etage und gibt `{ etagenMitSchacht }` zurück.
+ * - Wirft verständliche Fehler bei falschem Token-Format oder doppelten Einträgen.
+ */
+
 import { stripHashComments } from "../../../../helpers/parsingHelper";
 import { checkEtageRange } from "../../../../helpers/validationHelper";
 import type { SchachtState, SchachtSide } from "../../../../store/schachtSlice";

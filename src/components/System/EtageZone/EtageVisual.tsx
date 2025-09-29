@@ -1,3 +1,18 @@
+/** @packageDocumentation
+ * # Etage-Visual (`EtageVisual.tsx`)
+ *
+ * Darstellung einer einzelnen Etage inkl. Drop-Zonen und Ruftasten-Logik.
+ *
+ * - Rendert Etagenzahl und Entfernen-Button; zeigt optionale Zonen: `<SchachtZone>` / `<AnzeigeZone>` links/rechts.
+ * - DnD: akzeptiert `'KABINE'|'SCHACHT'|'ANZEIGE'` je **Hälfte** sowie `'RUFTASTE'` **vollflächig**; visuelles Overlay bei gültigem Drop.
+ * - Drop-Handler: fügt je nach Item `addKabine`, `addRuftasteToEtage`, `addSchachtToEtage`, `addAnzeigeToEtage` hinzu.
+ * - Ruftasten-UI: zeigt Pfeile **↑/↓** nur innerhalb `[lowestEtage, highestEtage]`; aktive Richtung wird markiert.
+ * - Klick auf Pfeil: `activateRuftaste` + `moveKabineToEtage`; blockiert, wenn Kabinentüren auf dieser Etage **öffnen/schließen**.
+ * - Entfernen-Aktionen: Etagen-Ruftasten via `removeRuftastenForEtage`, ganze Etage via `removeEtageCascade`.
+ * - Selektoren aus `etage`, `kabine`, `ruftaste`, `schacht`, `anzeige`; nutzt typisierten `dispatch`.
+ * - Heben Drop-Zonen zustandsabhängig hervor (`isOver*`, `canDrop*`, `draggingType`), aktivieren `pointerEvents` nur im passenden Modus.
+ */
+
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import { useDispatch, useSelector } from 'react-redux';

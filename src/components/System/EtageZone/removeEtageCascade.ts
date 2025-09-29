@@ -1,3 +1,14 @@
+/** @packageDocumentation
+ * # Etagen-Entfernung (Kaskaden-Thunk) (`removeEtageCascade`)
+ *
+ * - Entfernt eine Etage und **remappt** alle abhängigen States konsistent (Anzeige, Schacht, Ruftasten, Kabinen).
+ * - Aktualisiert `etage.etagen`: entfernt Nummer, sortiert neu und setzt `newMax`.
+ * - Anzeige/Schacht: mappt `etage` neu, **entdoppelt** `sides` und begrenzt auf max. 2 Seiten; löscht leere Einträge.
+ * - Ruftasten: remappt `etagenMitRuftasten` und `aktiveRuftasten` (Richtung bleibt erhalten); sortiert aufsteigend.
+ * - Kabinen: remappt `currentEtage` (mit **Clamping** auf `[1..newMax]`), passt `targetEtage` an; setzt `isMoving=false` und `directionMovement=null`, falls Ziel entfällt; remappt `callQueue` und `aktiveZielEtagen`.
+ * - Führt State-Updates atomar aus via `resetEtagen`, `resetAnzeige`, `resetSchacht`, `resetRuftasten`, `resetKabinen`.
+ */
+
 import { resetAnzeige } from "../../../store/anzeigeSlice ";
 import { resetEtagen } from "../../../store/etageSlice";
 import { resetKabinen, type Kabine } from "../../../store/kabineSlice";
@@ -86,8 +97,6 @@ export const removeEtageCascade =
                     directionMovement,
                     callQueue,
                     aktiveZielEtagen,
-                    // опционально: закрыть двери, если target сброшен
-                    // doorsOpen: targetEtage == null ? false : k.doorsOpen,
                 };
             });
 

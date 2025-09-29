@@ -1,3 +1,13 @@
+/** @packageDocumentation
+ * # Deklarativ-Parser: Ruftasten (`parseDeklarativRuftasteCode`)
+ *
+ * - Normalisiert den Eingabetext: entfernt `#`-Kommentare, wandelt `True/False/None` → `true/false/null`, entfernt trailing commas.
+ * - Sucht den Block `ruftasten = { ... }`; fehlt er, wird `{ etagenMitRuftasten: [], aktiveRuftasten: [] }` zurückgegeben.
+ * - Parst optional `"etagenMitRuftasten": [ { "etage": <zahl> }, ... ]`: Bereich **1–3**, keine Duplikate, aufsteigend sortiert.
+ * - Parst optional `"aktiveRuftasten": [ { "etage": <zahl>, "call_direction": "up"|"down" }, ... ]`: validiert Werte, verhindert doppelte (Etage,Richtung)-Paare, sortiert nach Etage und `'up'` vor `'down'`.
+ * - Liefert das Ergebnis als Objekt `{ etagenMitRuftasten, aktiveRuftasten }`.
+ */
+
 import type { Richtung } from "../../../../store/ruftasteSlice";
 import {
     extractBracketInner,

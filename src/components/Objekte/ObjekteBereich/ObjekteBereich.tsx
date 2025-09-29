@@ -1,3 +1,12 @@
+/** @packageDocumentation
+ * # Objekte-Bereich (`ObjekteBereich.tsx`)
+ *
+ * Palette/Werkzeugbereich zum Hinzufügen und Aufräumen von Objekten.
+ *
+ * - Rendert Aktionsbuttons: **Add All** → `dispatch(addAll())`, **Clear All** → `dispatch(clearAll())`.
+ * - Stellt die Objektpalette dar: `<EtageItem />`, `<SchachtItem />`, `<AnzeigeItem />`, `<RuftasteItem />`, `<KabineItem />`, `<BedienpanelItem />`.
+ */
+
 import React from 'react';
 import EtageItem from '../EtageItem/EtageItem';
 import KabineItem from '../KabineItem/KabineItem';

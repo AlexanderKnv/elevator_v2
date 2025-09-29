@@ -1,3 +1,13 @@
+/** @packageDocumentation
+ * # Deklarativ-Generator: Schacht (`generateDeklarativSchachtCode`)
+ *
+ * - Nimmt `SchachtState` entgegen und erzeugt einen JSON-ähnlichen Block `schacht = [ { "etage": <n>, "sides": ["left","right"] }, ... ]`.
+ * - Sortiert Einträge aufsteigend nach `etage`.
+ * - Entdoppelt `sides` je Etage und ordnet deterministisch: `"left"` vor `"right"`.
+ * - Repräsentiert fehlende Seiten als leeres Array `[]`.
+ * - Gibt `""` (Leerstring) zurück, wenn keine Einträge vorhanden sind; robust gegen `null/undefined` durch Fallback `state?.etagenMitSchacht ?? []`.
+ */
+
 import type { SchachtState, SchachtSide } from "../../../../store/schachtSlice";
 
 export function generateDeklarativSchachtCode(state: SchachtState): string {

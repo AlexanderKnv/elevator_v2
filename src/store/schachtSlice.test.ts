@@ -1,3 +1,35 @@
+/** @packageDocumentation
+ * # Tests: Schacht-Slice (`schachtSlice.spec.ts`)
+ *
+ * - Initialzustand:
+ *   - Eingabe: `schachtReducer(undefined, { type: '@@INIT' })`
+ *   - Erwartung: `{ etagenMitSchacht: [] }`
+ *
+ * - `addSchachtToEtage` — erstellt neuen Eintrag, wenn keiner existiert:
+ *   - Eingabe: `addSchachtToEtage({ etage: 1, side: 'left' })`
+ *   - Erwartung: genau **1** Eintrag für Etage **1** mit `sides = ['left']`
+ *
+ * - `addSchachtToEtage` — fügt zweite Seite hinzu und verhindert Duplikate:
+ *   - Eingabe: nacheinander `({ etage: 2, 'left' })`, `({ etage: 2, 'right' })`, erneut `({ etage: 2, 'right' })`
+ *   - Erwartung: für Etage **2** exakt `['left','right']`; dritter Aufruf ist **No-Op**
+ *
+ * - `addSchachtToEtage` — überschreitet **nie** 2 Seiten:
+ *   - Eingabe: auf Etage **3** `left`, dann `right`, dann wieder `left`
+ *   - Erwartung: weiterhin `['left','right']`; letzter Aufruf **No-Op**
+ *
+ * - `removeSchachtFromEtage` — entfernt Seite; löscht Eintrag bei letzter Seite:
+ *   - Eingabe: für Etage **5** erst `left` hinzufügen, dann `right`; anschließend `remove … ('right')` und danach `remove … ('left')`
+ *   - Erwartung: nach erstem Entfernen bleibt `['left']`; danach **kein** Eintrag mehr für Etage **5**
+ *
+ * - `removeSchachtFromEtage` — **No-Op** bei fehlender Etage/Seite:
+ *   - Eingabe: Zustand mit Etage **7** `'left'`; `remove … ('right')` und `remove … (etage: 99, 'left')`
+ *   - Erwartung: **keine** Zustandsänderung in beiden Fällen
+ *
+ * - `resetSchacht` — dedupliziert `sides` je Eintrag und sortiert nach `etage`:
+ *   - Eingabe: `{ etagenMitSchacht: [ { etage: 2, sides: ['right','left','left'] }, { etage: 1, sides: ['left'] } ] }`
+ *   - Erwartung: Etagenreihenfolge **[1,2]**; für **1** `['left']`, für **2** `['left','right']` (Duplikate entfernt, Seiten deterministisch geordnet)
+ */
+
 import schachtReducer, {
     addSchachtToEtage,
     removeSchachtFromEtage,

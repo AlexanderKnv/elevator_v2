@@ -1,3 +1,16 @@
+/** @packageDocumentation
+ * # Imperativ-Generator: Anzeige (`generateImperativAnzeigeCode`)
+ *
+ * - Aggregiert Etagen pro Seite aus `state.etagenMitAnzeige` in zwei Mengen: **left** und **right** (ohne Duplikate).
+ * - Sortiert beide Etagenlisten aufsteigend.
+ * - Gibt `""` zurück, wenn beide Listen leer sind.
+ * - Formatiert die Ausgabe im Imperativ-/Variablenstil:
+ *   - Verwendet `etage_<n>` via `etageVar(n)` und Arrays wie `[etage_1, etage_3]` bzw. `[]`.
+ * - Erzeugt zwei Zeilen:
+ *   - `anzeige_left  = [...]`
+ *   - `anzeige_right = [...]`
+ */
+
 import { etageVar } from "../../../../helpers/renderHelper";
 import type { AnzeigeState } from "../../../../store/anzeigeSlice ";
 

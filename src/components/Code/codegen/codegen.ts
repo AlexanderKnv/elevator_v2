@@ -1,3 +1,13 @@
+/** @packageDocumentation
+ * # Code-Generator (`generateCode`)
+ *
+ * - Erzeugt vollständigen Python-Output im Stil **Deklarativ**, **Imperativ** oder **OOP**.
+ * - Ruft je nach Stil die passenden Generatoren für **Etagen**, **Kabinen**, **Ruftasten**, **Anzeige** und **Schacht** auf.
+ * - Fügt globale Timing-Parameter hinzu (`generateGlobalsCode`), sofern Kabinen vorhanden sind.
+ * - Verknüpft alle Teilblöcke mit Leerzeilen; leere Segmente werden übersprungen.
+ * - Liefert eine Willkommenszeile, wenn keine Inhalte generiert wurden.
+ */
+
 import type { AnzeigeState } from '../../../store/anzeigeSlice ';
 import type { GlobalsState } from '../../../store/globalsSlice';
 import type { Kabine } from '../../../store/kabineSlice';

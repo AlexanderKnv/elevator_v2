@@ -1,3 +1,14 @@
+/** @packageDocumentation
+ * # Imperativ-Parser: Ruftasten (`parseImperativRuftasteCode`)
+ *
+ * - Entfernt `#`-Kommentare und durchsucht den Text nach `ruftasten_etagen = [...]` und `aktive_ruftasten = [ {...} ]`.
+ * - Parst `ruftasten_etagen` als Liste von Tokens `etage_<n>`; validiert Bereich **1–3**, verhindert Duplikate, sortiert aufsteigend.
+ * - Parst `aktive_ruftasten` als Objekte `{ "etage": etage_<n>, "call_direction": "up"|"down" }`; validiert Werte und verhindert doppelte (Etage,Richtung)-Paare.
+ * - Sortiert aktive Rufe nach Etage und innerhalb derselben Etage `'up'` vor `'down'`.
+ * - Gibt `{ etagenMitRuftasten, aktiveRuftasten }` zurück; bei fehlenden Blöcken werden leere Listen geliefert.
+ * - Wirft verständliche Fehler bei falschem Format oder ungültigen/duplizierten Einträgen.
+ */
+
 import type { Richtung } from "../../../../store/ruftasteSlice";
 import { stripHashComments, extractBracketInner, splitTopLevelObjects } from "../../../../helpers/parsingHelper";
 import { checkEtageRange } from "../../../../helpers/validationHelper";

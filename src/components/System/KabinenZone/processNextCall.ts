@@ -1,3 +1,25 @@
+/** @packageDocumentation
+ * # Aufzugsruf-Engine & Timer (`processNextCall.ts`)
+ *
+ * Koordiniert Hall-Rufe, Kabinenziele und Tür-/Fahrt-Abläufe; verwaltet exklusive „Claims“ pro Etage/Richtung und zentralisierte Timer.
+ *
+ * - `hallKey(etage, dir)` — bildet einen stabilen Schlüssel `"etage|dir"` für Hall-Rufe.
+ * - `canClaim(side, etage, dirs)` — prüft, ob die angegebenen Richtungen der Etage **frei** sind oder bereits von **derselben** Kabine beansprucht werden.
+ * - `claim(side, etage, dirs)` — markiert die Richtungen an der Etage exklusiv für die Kabine `side` (verhindert Parallelbedienung).
+ * - `release(etage, dirs=['up','down'])` — hebt Claims für die Etage (optional nur bestimmte Richtungen) auf.
+ * - `setT(fn, ms)` — `setTimeout`-Wrapper mit Buchführung: speichert die Timer-ID in `allTimeouts` und entfernt sie automatisch nach Ablauf, bevor `fn` ausgeführt wird.
+ * - `clearAllTimeouts()` — stoppt **alle** noch offenen Timer und leert `allTimeouts` (z. B. bei Reset/Unmount).
+ * - `processNextCall(side)` — Haupt-Thunk zur Abarbeitung des nächsten Fahrziels:
+ *   - Liest Kabinen-/Global-State; beendet früh, wenn Kabine fehlt oder **bereits fährt**.
+ *   - Ermittelt **interne Ziele** (`aktiveZielEtagen`) und **Hall-Rufe** (gefiltert nach freien/ eigenen Claims).
+ *   - Setzt/entscheidet `directionMovement`: bevorzugt aktuellen Hall-Ruf auf der **aktuellen Etage**, sonst nächste Nachfrage-Richtung.
+ *   - **Stop-Entscheidung hier:** hält, wenn internes Ziel vorliegt **oder** claimbare Hall-Rufe auf der aktuellen Etage existieren (inkl. Claim-Vergabe); verhindert Halt, wenn die andere Kabine am selben Stock mit **offenen** Türen steht.
+ *   - Türzyklus bei Halt: `opening → closing → closed` über zwei `setT`-Timer (`doorTimeMs`), inkl. Deaktivieren der Hall-Rufe, Release der Claims, Entfernen interner Ziele/Queue-Einträge; danach ggf. Rekursion (`processNextCall`) oder Richtungs-Reset.
+ *   - **Fahrtplanung:** wählt Kandidaten **vorwärts** in aktueller Richtung (interne Ziele + passende Hall-Rufe); wenn leer → betrachtet **Gegenrichtung**; Fallback: **nächstgelegene** Nachfrage.
+ *   - **Pre-Claim am Ziel:** versucht vor Anfahrt die Hall-Richtungen der Ziel-Etage zu claimen; bei Konflikt → sofortige Neuplanung.
+ *   - Startet Bewegung: `setTargetEtage`, berechnet Fahrtdauer (`|Δ| * speedMs`) und führt nach Ablauf `completeMovement` + Türzyklus aus; optional Zwischen-Update der `currentEtage` bei größeren Distanzen.
+ */
+
 import { completeMovement, openDoors, removeCallFromQueue, removeZielEtage, setDoorsState, setDirectionMovement, setTargetEtage, setCurrentEtage, type KabineSide, type Kabine } from "../../../store/kabineSlice";
 import { deactivateRuftaste } from "../../../store/ruftasteSlice";
 import type { AppDispatch } from "../../../store/store";

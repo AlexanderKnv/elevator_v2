@@ -1,3 +1,24 @@
+/** @packageDocumentation
+ * # Setup-/Reset-Thunks (`clearAll`, `addAll`)
+ *
+ * Initialisiert eine komplette Demo-Konfiguration oder leert das System.
+ *
+ * - `clearAll()`:
+ *   - Stoppt alle laufenden Timer (Zeitsteuerungen) und leert deren Registry.
+ *   - Setzt **Etagen**, **Schacht**, **Anzeige**, **Ruftasten** und **Kabinen** auf leeren Zustand zurück.
+ *
+ * - `addAll()`:
+ *   - Führt zunächst `clearAll()` aus, um einen definierten Ausgangszustand sicherzustellen.
+ *   - Legt `MAX_ETAGEN` Etagen an und liest die resultierende Liste aus dem Store.
+ *   - Für **jede** Etage:
+ *     - fügt Schacht links **und** rechts hinzu,
+ *     - fügt Anzeige links **und** rechts hinzu,
+ *     - registriert eine Ruftaste.
+ *   - Erzeugt zwei Kabinen-Presets (`kabine-left`, `kabine-right`) auf der **untersten** Etage:
+ *     - Türen geschlossen, kein Ziel, nicht in Bewegung, leere Queues, internes Panel aktiviert.
+ *   - Synchronisiert die Ruftasten-Konfiguration: `etagenMitRuftasten = etagen`, `aktiveRuftasten = []`.
+ */
+
 import { addAnzeigeToEtage, resetAnzeige } from "../../../store/anzeigeSlice ";
 import { addEtage, resetEtagen } from "../../../store/etageSlice";
 import { resetKabinen, type Kabine } from "../../../store/kabineSlice";

@@ -1,3 +1,20 @@
+/** @packageDocumentation
+ * # Etagen-Slice (`etageSlice.ts`)
+ *
+ * Verwaltung der **Etagenliste** (nummerierte Stockwerke) der Anwendung.
+ *
+ * **State**
+ * ```ts
+ * interface EtageState { etagen: number[] }
+ * ```
+ *
+ * **Aufgaben**
+ * - `addEtage()` fügt eine neue Etage am Ende an (Nummer = `length + 1`) — **max. 3** Etagen.
+ * - `removeEtage(nr)` entfernt die Etage mit Nummer `nr` und **renummeriert** anschließend
+ *   lückenlos auf `[1..N]` in aufsteigender Reihenfolge.
+ * - `resetEtagen(list)` setzt die Etagenliste direkt aus der Payload.
+ */
+
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface EtageState {

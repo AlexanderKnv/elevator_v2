@@ -1,3 +1,13 @@
+/** @packageDocumentation
+ * # Etagen-Zone (`EtageZone.tsx`)
+ *
+ * - Akzeptiert den DnD-Typ `'ETAGE'` und fügt bei Drop eine neue Etage hinzu, solange `etagen.length < MAX_ETAGEN`.
+ * - Rendert vorhandene Etagen in absteigender Reihenfolge mittels `<EtageVisual etageNumber={nr} />`.
+ * - Hebt eine gültige Drop-Zone mit einem Overlay „+ Etage“ hervor; Position richtet sich nach der aktuellen Etagenanzahl.
+ * - Verwendet den Redux-Store (`state.etage.etagen`) und `dispatch(addEtage())`.
+ * - Nutzt `useDrop`-Collector (`isOverEtage`) für UI-Feedback und `dropRefEtage` als Container-Ref.
+ */
+
 import './EtageZone.css';
 import { useDrop } from 'react-dnd';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,8 +34,7 @@ const EtageZone: React.FC = () => {
     }));
 
     return (
-        //@ts-ignore
-        <div ref={dropRefEtage} className="etagen-container" style={{ position: 'relative' }}>
+        <div ref={dropRefEtage as unknown as React.Ref<HTMLDivElement>} className="etagen-container" style={{ position: 'relative' }}>
             {[...etagen].reverse().map((nr) => (
                 <EtageVisual key={nr} etageNumber={nr} />
             ))}

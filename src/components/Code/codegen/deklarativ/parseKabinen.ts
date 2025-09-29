@@ -1,3 +1,19 @@
+/** @packageDocumentation
+ * # Deklarativ-Parser: Kabinen (`parseDeklarativKabinenCode`)
+ *
+ * - Normalisiert den Eingabetext: entfernt `#`-Kommentare, wandelt `True/False/None` → `true/false/null`, entfernt trailing commas.
+ * - Extrahiert den Block `kabinen = [ ... ]`; bei fehlender/leer getrimmter Liste → gibt `[]` zurück.
+ * - Zerlegt den Listeninhalt in Top-Level-Objekte `{ ... }`; wirft Fehler, wenn keine Objekte gefunden werden.
+ * - Liest Pflichtfelder mit Readern: String, Zahl, Zahl oder `null`, `true|false`, Enum `"up"|"down"|null`, Zahlen-Array; meldet präzise Fehlermeldungen.
+ * - Validiert `side ∈ {"left","right"}` und erzwingt `id === "kabine-<side>"`; verhindert doppelte `side`-Einträge und doppelte `id`s.
+ * - Prüft `current_etage` (Bereich 1–3), `target_etage` (1–3 oder `null`) und verhindert `target === current`.
+ * - Prüft Konsistenz `direction_movement` zu `current/target` (`"up"` erfordert `target > current`, `"down"` erfordert `target < current`).
+ * - Liest `call_queue` und `aktive_ziel_etagen` als Integer-Listen; validiert jeden Eintrag im Bereich 1–3.
+ * - Leitet `doorsState` aus `tuer_offen` ab (`open`/`closed`) und baut vollständige `Kabine`-Objekte.
+ * - Begrenzt Gesamtanzahl der Kabinen auf **maximal 2** (left & right); andernfalls Fehler.
+ * - Sortiert Ergebnis deterministisch: `side` (left vor right), dann `id` (lexikografisch), und gibt `Kabine[]` zurück.
+ */
+
 import type { Kabine, KabineSide } from "../../../../store/kabineSlice";
 import { tryExtractBracketInner, normalizePyBooleansNone, stripHashComments, stripTrailingCommas, splitTopLevelObjects } from "../../../../helpers/parsingHelper";
 import { checkEtageRange, ensureDirectionConsistent, ensureTargetNotEqualCurrent } from "../../../../helpers/validationHelper";

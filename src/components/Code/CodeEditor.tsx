@@ -1,3 +1,14 @@
+/** @packageDocumentation
+ * # Code-Editor (`CodeEditor.tsx`)
+ *
+ * - Generiert bei Änderungen von Stil oder Store-Zustand (Etagen, Kabinen, Ruftasten, Anzeige, Schacht, Globals) automatisch Textcode via `generateCode(...)` (useEffect).
+ * - Führt beim Klick auf **Run** das Parsen mit `parseCode(style, code)` aus und schreibt die Ergebnisse zurück in den Redux-Store (`resetGlobals`, `resetEtagen`, `resetKabinen`, `resetRuftasten`, `resetAnzeige`, `resetSchacht`); Fehler landen in `errorMessage`.
+ * - Bietet Clipboard-Utilities: **Paste** (inkl. `contentEditable` & Inputs), **Copy**, **Cut** (inkl. Löschen der Auswahl) und **Delete** (entfernt aktuelle Auswahl).
+ * - Stellt eine Stil-Auswahl bereit (Imperativ/Deklarativ/OOP), die den Editorinhalt entsprechend umschaltet.
+ * - Rendert den Editor mit CodeMirror (Python-Extension, `oneDark`-Theme) und synchronisiert `code` über lokalen State.
+ * - Zeigt Validierungs-/Parserfehler unterhalb des Editors als rote Hinweismeldung an.
+ */
+
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { useEffect, useState } from 'react';

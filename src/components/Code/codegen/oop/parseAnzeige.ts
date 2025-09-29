@@ -1,3 +1,14 @@
+/** @packageDocumentation
+ * # OOP-Parser: Anzeige (`parseOopAnzeigeCode`)
+ *
+ * - Entfernt `#`-Kommentare aus dem Eingabetext.
+ * - Parst Zuweisungen im Format `anzeige_panel_<etage>_<side> = AnzeigePanel(etage_<etage>, "<side>")`.
+ * - Prüft Konsistenz: Variablen-`<etage>` ≙ Argument-`etage_<…>` und Variablen-`<side>` ≙ Argument-`"<side>"`.
+ * - Validiert den Etagenbereich (1–3) via `checkEtageRange`.
+ * - Verhindert doppelte Seiten je Etage (z. B. zweimal `"left"`).
+ * - Aggregiert zu `{ etage, sides }[]`, sortiert Sides deterministisch (`left` vor `right`) und das Ergebnis nach Etage.
+ */
+
 import { stripHashComments } from "../../../../helpers/parsingHelper";
 import { checkEtageRange } from "../../../../helpers/validationHelper";
 import type { AnzeigeSide, AnzeigeState } from "../../../../store/anzeigeSlice ";

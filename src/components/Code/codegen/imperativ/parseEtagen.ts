@@ -1,3 +1,14 @@
+/** @packageDocumentation
+ * # Imperativ-Parser: Etagen (`parseImperativEtagenCode`)
+ *
+ * - Sucht Zeilen im Format `etage_<nr> = <nr>` und ignoriert andere.
+ * - Validiert pro Zeile das Muster; bei Abweichung → Fehlermeldung mit Zeilennummer.
+ * - Prüft, dass `id` und `nr` gleich sind (z. B. `etage_2 = 2`).
+ * - Verhindert Duplikate und erzwingt den Wertebereich **1–3**.
+ * - Prüft die Gesamtanzahl: maximal **3** Etagen erlaubt.
+ * - Gibt die gefundenen Etagen als `number[]` zurück; bei keiner passenden Zeile → `[]`.
+ */
+
 export function parseImperativEtagenCode(code: string): number[] {
     const etagen: number[] = [];
 
@@ -46,4 +57,3 @@ export function parseImperativEtagenCode(code: string): number[] {
 
     return etagen;
 }
-

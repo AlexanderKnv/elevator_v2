@@ -1,3 +1,13 @@
+/** @packageDocumentation
+ * # OOP-Generator: Anzeige (`generateOopAnzeigeCode`)
+ *
+ * - Erzeugt eine einfache Python-Klasse `AnzeigePanel` mit `__init__(self, etage, side)`.
+ * - Sortiert Einträge aufsteigend nach `etage` und ordnet `sides` deterministisch: `"left"` vor `"right"`.
+ * - Generiert pro (Etage, Seite) eine Instanzzeile: `anzeige_panel_<etage>_<side> = AnzeigePanel(etage_<n>, "<side>")`.
+ * - Verwendet `etageVar(n)` zur Ausgabe als `etage_<n>`.
+ * - Liefert einen zusammenhängenden String aus Klassendefinition und Instanzzuweisungen.
+ */
+
 import { etageVar } from "../../../../helpers/renderHelper";
 import type { AnzeigeState } from "../../../../store/anzeigeSlice ";
 

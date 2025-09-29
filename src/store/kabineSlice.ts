@@ -1,3 +1,37 @@
+/** @packageDocumentation
+ * # Kabinen-Slice (`kabineSlice.ts`)
+ *
+ * Verwaltung der **Aufzugskabinen** (links/rechts) inkl. Position, Türenzustand,
+ * Zielsteuerung und Warteschlangen.
+ *
+ * **Typen**
+ * ```ts
+ * export type KabineSide = 'left' | 'right';
+ * export interface Kabine {
+ *   id: string;
+ *   side: KabineSide;
+ *   currentEtage: number;
+ *   doorsOpen: boolean;
+ *   targetEtage: number | null;
+ *   isMoving: boolean;
+ *   callQueue: number[];
+ *   directionMovement: 'up' | 'down' | null;
+ *   hasBedienpanel: boolean;
+ *   aktiveZielEtagen: number[];
+ *   doorsState: 'open' | 'closed' | 'opening' | 'closing';
+ * }
+ * interface KabineState { kabinen: Kabine[] }
+ * ```
+ *
+ * **Aufgaben**
+ * - **Anlage/Entfernung** von Kabinen je Seite (`addKabine`, `removeKabine`).
+ * - **Positions- und Fahrsteuerung** (`setCurrentEtage`, `setTargetEtage`, `completeMovement`).
+ * - **Türsteuerung** über Flag (`openDoors`) und **feineren Zustand** (`setDoorsState`).
+ * - **Ruf-/Zielverwaltung**: `callQueue`, `aktiveZielEtagen`, Bewegungsrichtung (`setDirectionMovement`).
+ * - **Ausstattung** der Kabine (z. B. `hasBedienpanel` via `addBedienpanelToKabine`).
+ * - Gesamtrücksetzung (`resetKabinen`).
+ */
+
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 export type KabineSide = 'left' | 'right';

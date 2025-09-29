@@ -1,3 +1,72 @@
+/** @packageDocumentation
+ * # Tests: Kabine-Slice (`kabineSlice.spec.ts`)
+ *
+ * - Initialzustand:
+ *   - Eingabe: `kabineReducer(undefined, { type: '@@INIT' })`
+ *   - Erwartung: `{ kabinen: [] }`
+ *
+ * - `addKabine` — legt eine neue Kabine mit Defaultwerten an:
+ *   - Eingabe: Startzustand → `addKabine({ etage: 3, side: 'left' })`
+ *   - Erwartung: genau **1** Kabine mit
+ *     `id: "kabine-left"`, `side: "left"`, `currentEtage: 3`,
+ *     `doorsOpen: false`, `targetEtage: null`, `isMoving: false`,
+ *     `callQueue: []`, `directionMovement: null`, `hasBedienpanel: false`,
+ *     `aktiveZielEtagen: []`, `doorsState: "closed"`
+ *
+ * - `addKabine` — verhindert Duplikate pro Seite:
+ *   - Eingabe: erst `addKabine({ side: 'left' })`, danach erneut `addKabine({ side: 'left' })`
+ *   - Erwartung: zweiter Aufruf ist **No-Op**; `addKabine({ side: 'right' })` fügt zweite Kabine hinzu
+ *   - Ergebnis: Seitenmenge = `['left','right']`
+ *
+ * - `setCurrentEtage` — setzt aktuelle Etage / No-Op bei unbekannter Seite:
+ *   - Eingabe: vorhandene `left`-Kabine → `setCurrentEtage({ side: 'left', etage: 7 })`
+ *   - Erwartung: `currentEtage: 7`; anschließend `setCurrentEtage({ side: 'right', etage: 9 })` ist **No-Op**
+ *
+ * - `setTargetEtage` — setzt Ziel, startet Bewegung, schließt Türen; No-Op während Bewegung:
+ *   - Eingabe: `setTargetEtage({ side: 'left', etage: 5 })`
+ *   - Erwartung: `targetEtage: 5`, `isMoving: true`, `doorsOpen: false`
+ *   - Weiterer Aufruf `setTargetEtage(...)` solange `isMoving: true` → **No-Op**
+ *
+ * - `completeMovement` — übernimmt Ziel als aktuelle Etage und beendet Bewegung; No-Op ohne Ziel:
+ *   - Eingabe: nach gesetztem Ziel `completeMovement({ side: 'left' })`
+ *   - Erwartung: `currentEtage = targetEtage`, `isMoving: false`, `targetEtage: null`
+ *   - erneuter Aufruf ohne Ziel → **No-Op**
+ *
+ * - `openDoors` — toggelt Türstatus; No-Op bei unbekannter Seite:
+ *   - Eingabe: zweimal `openDoors({ side: 'left' })`
+ *   - Erwartung: `doorsOpen` wechselt `false → true → false`
+ *   - `openDoors({ side: 'right' })` ohne `right`-Kabine → **No-Op**
+ *
+ * - Call-Queue (`addCallToQueue` / `removeCallFromQueue`) — fügt ohne Duplikate hinzu, entfernt korrekt:
+ *   - Eingabe: `addCallToQueue({ etage: 2 })`, nochmals `etage: 2`, dann `etage: 3`
+ *   - Erwartung: Queue `=[2,3]` (Duplikat ignoriert); `removeCallFromQueue({ etage: 2 })` → `[3]`;
+ *     Entfernen einer nicht vorhandenen Etage → **No-Op**
+ *
+ * - `setDirectionMovement` — setzt Fahrtrichtung:
+ *   - Eingabe: nacheinander `up`, `down`, `null`
+ *   - Erwartung: `directionMovement: 'up' → 'down' → null`
+ *
+ * - Ziel-Etagen (`addZielEtage` / `removeZielEtage`) — ohne Duplikate, korrektes Entfernen:
+ *   - Eingabe: `addZielEtage(10)`, erneut `10`, dann `11`; anschließend `removeZielEtage(10)`
+ *   - Erwartung: Liste `=[10,11]` (Duplikat ignoriert) → nach Entfernen `=[11]`
+ *
+ * - `addBedienpanelToKabine` — setzt Flag idempotent:
+ *   - Eingabe: zweimal `addBedienpanelToKabine({ side: 'left' })`
+ *   - Erwartung: `hasBedienpanel: true` bleibt **true**
+ *
+ * - `setDoorsState` — setzt gültige Türzustände:
+ *   - Eingabe: der Reihe nach `opening → open → closing → closed`
+ *   - Erwartung: `doorsState` entspricht jeweils dem gesetzten Wert
+ *
+ * - `resetKabinen` — ersetzt Liste exakt durch Payload:
+ *   - Eingabe: `resetKabinen([makeKabine('right', { currentEtage: 9 })])`
+ *   - Erwartung: Zustand exakt wie Payload (`kabinen` nur `right` mit `currentEtage: 9`)
+ *
+ * - `resetKabinen` + `addKabine` — Duplikat-Seite weiterhin verhindert:
+ *   - Eingabe: nach `resetKabinen([makeKabine('left')])` anschließend `addKabine({ side: 'left' })`
+ *   - Erwartung: **No-Op** (zweite `left`-Kabine wird nicht angelegt)
+ */
+
 import kabineReducer, {
     addKabine,
     setCurrentEtage,

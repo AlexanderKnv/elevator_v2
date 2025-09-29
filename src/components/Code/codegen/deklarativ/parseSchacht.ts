@@ -1,3 +1,15 @@
+/** @packageDocumentation
+ * # Deklarativ-Parser: Schacht (`parseDeklarativSchachtCode`)
+ *
+ * - Normalisiert den Eingabetext: entfernt `#`-Kommentare, wandelt `True/False/None` → `true/false/null`, entfernt trailing commas.
+ * - Extrahiert den Block `schacht = [ ... ]`; bei fehlendem/leerem Block → `{ etagenMitSchacht: [] }`.
+ * - Zerlegt den Listeninhalt in Top-Level-Objekte und validiert deren Vorhandensein.
+ * - Liest `etage` (Ganzzahl), prüft den Bereich via `checkEtageRange` und verhindert doppelte Etagen.
+ * - Parst `sides` als Liste aus `"left"`/`"right"`; prüft auf Duplikate und maximal **2** Einträge.
+ * - Sortiert `sides` deterministisch (`left` vor `right`) und sammelt alle Einträge.
+ * - Sortiert das Ergebnis nach `etage` und gibt `{ etagenMitSchacht }` zurück.
+ */
+
 import { normalizePyBooleansNone, splitTopLevelObjects, stripHashComments, stripTrailingCommas, tryExtractBracketInner } from "../../../../helpers/parsingHelper";
 import { checkEtageRange } from "../../../../helpers/validationHelper";
 import type { SchachtState, SchachtSide } from "../../../../store/schachtSlice";

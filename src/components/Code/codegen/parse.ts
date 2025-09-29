@@ -1,3 +1,12 @@
+/** @packageDocumentation
+ * # Code-Parser (`parseCode`)
+ *
+ * - Erkennt den angegebenen Stil (**Deklarativ** | **Imperativ** | **OOP**) und ruft die passenden Parser für Etagen, Kabinen, Ruftasten, Anzeige und Schacht auf.
+ * - Parst globale Parameter immer separat via `parseGlobalsCode` und liefert sie als `Partial<GlobalsState> | null` zurück.
+ * - Gibt ein strukturiertes Objekt mit allen Teilzuständen zurück; bei unbekanntem Stil werden leere Default-Werte geliefert.
+ * - Erwartet Rohtext (Python-ähnlich) und kapselt die Stil-spezifische Zerlegung/Validierung.
+ */
+
 import { parseDeklarativEtagenCode } from './deklarativ/parseEtagen';
 import { parseImperativEtagenCode } from './imperativ/parseEtagen';
 import { parseOopEtagenCode } from './oop/parseEtagen';

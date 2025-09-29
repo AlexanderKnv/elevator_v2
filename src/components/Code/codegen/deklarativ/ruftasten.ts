@@ -1,3 +1,18 @@
+/** @packageDocumentation
+ * # Deklarativ-Generator: Ruftasten (`generateDeklarativRuftasteCode`)
+ *
+ * - Gibt `""` zurück, wenn sowohl `etagenMitRuftasten` als auch `aktiveRuftasten` leer sind.
+ * - Entdoppelt und sortiert `etagenMitRuftasten` aufsteigend (robust gegen `null/undefined`).
+ * - Normalisiert `aktiveRuftasten` und sortiert deterministisch: zuerst nach Etage, dann `'up'` vor `'down'`.
+ * - Erzeugt einen JSON-ähnlichen Block:
+ *   ```
+ *   ruftasten = {
+ *     "etagenMitRuftasten": [ { "etage": <n> }, ... ],
+ *     "aktiveRuftasten":    [ { "etage": <n>, "call_direction": "up"|"down" }, ... ]
+ *   }
+ *   ```
+ */
+
 import type { Richtung } from "../../../../store/ruftasteSlice";
 
 export function generateDeklarativRuftasteCode(

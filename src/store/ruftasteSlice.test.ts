@@ -1,3 +1,47 @@
+/** @packageDocumentation
+ * # Tests: Ruftaste-Slice (`ruftasteSlice.spec.ts`)
+ *
+ * - Initialzustand:
+ *   - Eingabe: `ruftasteReducer(undefined, { type: '@@INIT' })`
+ *   - Erwartung: `{ etagenMitRuftasten: [], aktiveRuftasten: [] }`
+ *
+ * - `addRuftasteToEtage` — fügt Etage einmalig hinzu (keine Duplikate):
+ *   - Eingabe: `addRuftasteToEtage(3)` zweimal
+ *   - Erwartung: nach dem ersten Aufruf `etagenMitRuftasten = [3]`; zweiter Aufruf ist **No-Op**
+ *
+ * - `activateRuftaste` — aktiviert (Etage, Richtung) ohne Duplikate:
+ *   - Eingabe: `activateRuftaste({ etage: 2, callDirection: 'up' })` dann erneut `'up'`, anschließend `'down'`
+ *   - Erwartung: zuerst `[{ etage: 2, callDirection: 'up' }]`; erneutes `'up'` **No-Op**; danach zusätzlich `{ etage: 2, callDirection: 'down' }`
+ *
+ * - `deactivateRuftaste` — entfernt aktives Paar; No-Op wenn nicht vorhanden:
+ *   - Eingabe: aktivieren `{ etage: 5, 'down' }` → `deactivateRuftaste({ etage: 5, 'down' })` → erneut deaktivieren
+ *   - Erwartung: nach erster Deaktivierung `aktiveRuftasten = []`; zweiter Aufruf **No-Op**
+ *
+ * - `removeRuftastenForEtage` — beeinflusst nur `etagenMitRuftasten`:
+ *   - Eingabe: `addRuftasteToEtage(4)`, `activateRuftaste({ etage: 4, 'up' })`, dann `removeRuftastenForEtage(4)`
+ *   - Erwartung: `etagenMitRuftasten = []`, **aktive Einträge bleiben**: `[{ etage: 4, callDirection: 'up' }]`
+ *
+ * - `resetRuftasten` — sortiert Etagen und aktive Einträge (ohne Deduplizierung der Etagenliste):
+ *   - Eingabe:
+ *     ```
+ *     {
+ *       etagenMitRuftasten: [3,1,2,2],
+ *       aktiveRuftasten: [
+ *         { etage: 2, 'down' }, { etage: 1, 'down' },
+ *         { etage: 2, 'up'   }, { etage: 1, 'up'   }
+ *       ]
+ *     }
+ *     ```
+ *   - Erwartung:
+ *     - `etagenMitRuftasten = [1,2,2,3]` (aufsteigend, **Duplikate bleiben erhalten**)
+ *     - `aktiveRuftasten` gruppiert nach Etage, innerhalb **'up' vor 'down'**:
+ *       `[{1,'up'},{1,'down'},{2,'up'},{2,'down'}]`
+ *
+ * - Aktivieren ohne vorherige Registrierung der Etage:
+ *   - Eingabe: `activateRuftaste({ etage: 99, callDirection: 'up' })` ohne vorheriges `addRuftasteToEtage`
+ *   - Erwartung: Eintrag wird **trotzdem gespeichert**: `aktiveRuftasten = [{ etage: 99, callDirection: 'up' }]`
+ */
+
 import ruftasteReducer, {
     addRuftasteToEtage,
     activateRuftaste,

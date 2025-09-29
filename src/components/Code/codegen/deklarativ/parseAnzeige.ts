@@ -1,3 +1,15 @@
+/** @packageDocumentation
+ * # Deklarativ-Parser: Anzeige (`parseDeklarativAnzeigeCode`)
+ *
+ * - Normalisiert den Eingabetext: entfernt `#`-Kommentare, wandelt `True/False/None` → `true/false/null`, entfernt trailing commas.
+ * - Sucht den Block `anzeige = [ ... ]`; bei fehlender Liste → Rückgabe eines leeren `AnzeigeState`.
+ * - Zerlegt den Listeninhalt in Top-Level-Objekte `{ ... }`; wirft Fehler, wenn keine Objekte vorhanden sind.
+ * - Liest und validiert `etage` (Ganzzahl); prüft Bereich via `checkEtageRange` und verhindert doppelte Etagen.
+ * - Parst `sides` als Liste ausschließlich aus `"left"`/`"right"`; prüft auf Duplikate und maximal **2** Einträge.
+ * - Sortiert `sides` deterministisch (`left` vor `right`) und sammelt alle Einträge in `result`.
+ * - Sortiert das Ergebnis nach `etage` und gibt `{ etagenMitAnzeige: result }` zurück.
+ */
+
 import { normalizePyBooleansNone, splitTopLevelObjects, stripHashComments, stripTrailingCommas, tryExtractBracketInner } from "../../../../helpers/parsingHelper";
 import { checkEtageRange } from "../../../../helpers/validationHelper";
 import type { AnzeigeSide, AnzeigeState } from "../../../../store/anzeigeSlice ";

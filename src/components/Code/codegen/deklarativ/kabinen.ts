@@ -1,3 +1,16 @@
+/** @packageDocumentation
+ * # Deklarativ-Generator: Kabinen (`generateDeklarativKabinenCode`)
+ *
+ * - Gibt `""` zurück, wenn keine Kabinen vorhanden sind.
+ * - Erzeugt einen JSON-ähnlichen Block: `kabinen = [ { ...kabine... }, ... ]` mit stabiler Feldreihenfolge:
+ *   `id`, `side`, `current_etage`, `target_etage`, `is_moving`, `tuer_offen`, `call_queue`,
+ *   `direction_movement`, `has_bedienpanel`, `aktive_ziel_etagen`.
+ * - Sortiert die Eingabe deterministisch: zuerst `side` (**left** vor **right**), dann `id` (lexikografisch).
+ * - Serialisiert Booleans in Kleinbuchstaben (`true/false`) und Zahlenlisten als `[1, 2, 3]` bzw. `[]`.
+ * - Setzt `target_etage` auf `null`, wenn kein Ziel vorhanden ist.
+ * - Setzt `direction_movement` auf `"up"`/`"down"` oder `null`, wenn unbekannt.
+ */
+
 import type { Kabine } from "../../../../store/kabineSlice";
 
 export function generateDeklarativKabinenCode(kabinen: Kabine[]): string {

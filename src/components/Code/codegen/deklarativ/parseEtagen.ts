@@ -1,3 +1,14 @@
+/** @packageDocumentation
+ * # Deklarativ-Parser: Etagen (`parseDeklarativEtagenCode`)
+ *
+ * - Sucht den Block `etagen = [ ... ]`; fehlt der Block → Rückgabe `[]`.
+ * - Extrahiert den Listeninhalt zeilenweise und erwartet `{ "nr": <Zahl> }` (Komma am Zeilenende erlaubt).
+ * - Validiert jede Etage: Wertebereich **1–3**, keine Duplikate.
+ * - Prüft Obergrenze: maximal **3** Etagen insgesamt.
+ * - Wirft verständliche Fehler bei falschem Format, Doppelten oder ungültigen Werten.
+ * - Gibt die gefundenen Etagen als `number[]` in Eingabereihenfolge zurück.
+ */
+
 export function parseDeklarativEtagenCode(code: string): number[] {
     const blockMatch = code.match(/etagen\s*=\s*\[(.*?)\]/s);
     const etagen: number[] = [];
@@ -46,4 +57,3 @@ export function parseDeklarativEtagenCode(code: string): number[] {
 
     return etagen;
 }
-

@@ -1,3 +1,26 @@
+/** @packageDocumentation
+ * # Anzeige-Slice (`anzeigeSlice.ts`)
+ *
+ * Verwaltung von **Etagenanzeigen** (Panels) je Etage und Schachtseite (`'left' | 'right'`).
+ *
+ * **Typen / State-Struktur**
+ * ```ts
+ * export type AnzeigeSide = 'left' | 'right';
+ * export interface AnzeigeState {
+ *   etagenMitAnzeige: { etage: number; sides: AnzeigeSide[] }[];
+ * }
+ * ```
+ *
+ * **Aufgaben**
+ * - `addAnzeigeToEtage({ etage, side })` — fügt eine Anzeige an einer Seite hinzu
+ *   (keine Duplikate; max. **2** Seiten pro Etage).
+ * - `removeAnzeigeFromEtage({ etage, side })` — entfernt die Anzeige auf der angegebenen Seite;
+ *   löscht den Etagen-Eintrag, wenn danach keine Seiten mehr verbleiben.
+ * - `resetAnzeige(payload)` — setzt den Zustand neu:
+ *   - bei `number[]`: entfernt Duplikate, **sortiert** aufsteigend und setzt pro Etage standardmäßig `['left']`.
+ *   - bei `AnzeigeState`: entdoppelt `sides` je Etage und **sortiert** nach Etage.
+ */
+
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 export type AnzeigeSide = 'left' | 'right';

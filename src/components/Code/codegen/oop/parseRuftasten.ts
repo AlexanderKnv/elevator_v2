@@ -1,3 +1,13 @@
+/** @packageDocumentation
+ * # OOP-Parser: Ruftasten (`parseOopRuftasteCode`)
+ *
+ * - Entfernt `#`-Kommentare und sucht Panel-Definitionen `panel_<n> = RuftastenPanel(etage_<n>)`.
+ * - Prüft Konsistenz von Variablenname und Konstruktor-Argument, validiert Etagenbereich (1–3), verhindert doppelte Panels.
+ * - Baut `etagenMitRuftasten` aus gefundenen Panels und sortiert aufsteigend.
+ * - Parst optional `aktive_ruftasten = [ AktiverRuf(panel_<n>, "up"|"down"), ... ]`; validiert Panel-Referenzen und verhindert doppelte (Etage,Richtung)-Paare.
+ * - Sortiert aktive Rufe nach Etage und innerhalb der Etage `'up'` vor `'down'` und gibt `{ etagenMitRuftasten, aktiveRuftasten }` zurück.
+ */
+
 import type { Richtung } from "../../../../store/ruftasteSlice";
 import { stripHashComments, extractBracketInner, splitArgs } from "../../../../helpers/parsingHelper";
 import { checkEtageRange } from "../../../../helpers/validationHelper";

@@ -25,8 +25,7 @@ const AnzeigeItem: React.FC = () => {
     return (
         <div
             className="anzeige-item"
-            //@ts-ignore
-            ref={dragRef}
+            ref={dragRef as unknown as React.Ref<HTMLDivElement>}
             style={{ opacity: isDragging ? 0.5 : 1 }}
         >
             <img src={AnzeigeImage} alt="Anzeige" className="anzeige-image" />

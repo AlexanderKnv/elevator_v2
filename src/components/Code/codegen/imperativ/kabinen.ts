@@ -1,3 +1,17 @@
+/** @packageDocumentation
+ * # Imperativ-Generator: Kabinen (`generateImperativKabinenCode`)
+ *
+ * - Sortiert die Kabinen deterministisch per `sortKabinenById` (numerischer ID-Suffix).
+ * - Erzeugt für jede Kabine einen beschrifteten Block mit Variablen `kabine_<n>_*`:
+ *   `id`, `side`, `current_etage`, `target_etage`, `is_moving`, `tuer_offen`,
+ *   `call_queue`, `direction_movement`, `has_bedienpanel`, `aktive_ziel_etagen`.
+ * - Formatiert Werte im Imperativ-/Python-Stil:
+ *   - Etagenreferenzen über `etageVar(...)` bzw. `etageVarOrNone(...)`.
+ *   - Booleans als `True/False` via `pyBoolTF(...)`.
+ *   - Listen als `[etage_1, etage_3]` via `etageVarArray(...)`.
+ *   - Richtung als `"up"|"down"|None` via `pyNoneOrQuoted(...)`.
+ */
+
 import type { Kabine } from "../../../../store/kabineSlice";
 import { sortKabinenById } from "../../../../helpers/kabineHelper";
 import { pyBoolTF, etageVar, etageVarOrNone, etageVarArray, pyNoneOrQuoted } from "../../../../helpers/renderHelper";

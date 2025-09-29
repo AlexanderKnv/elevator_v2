@@ -1,3 +1,15 @@
+/** @packageDocumentation
+ * # OOP-Parser: Etagen (`parseOopEtagenCode`)
+ *
+ * Parser für OOP-Stil-Zuweisungen von Etagen.
+ *
+ * - Entfernt `#`-Kommentare und filtert Zeilen, die mit `etage_` beginnen.
+ * - Erwartet Format: `etage_<nr> = Etage(<nr>)`; prüft Konsistenz von Variablen- und Konstruktorwert.
+ * - Validiert den Wertebereich **1–3** je Etage und verhindert Duplikate (Fehler bei Wiederholungen).
+ * - Erzwingt eine Obergrenze von **maximal 3** Etagen (sonst Fehler).
+ * - Gibt die erkannten Etagen **aufsteigend sortiert** als `number[]` zurück.
+ */
+
 import { stripHashComments } from "../../../../helpers/parsingHelper";
 import { checkEtageRange } from "../../../../helpers/validationHelper";
 

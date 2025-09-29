@@ -1,3 +1,14 @@
+/** @packageDocumentation
+ * # Kabinen-Zone (`KabinenZone.tsx`)
+ *
+ * - Rendert die Kabine je Schachtseite; berechnet die vertikale Position aus `currentEtage`/`targetEtage` und animiert die Fahrt mit `speedMs`.
+ * - Öffnet/Schließt Türflügel mit CSS-Transition auf Basis von `doorTimeMs`; reduziert die Deckkraft während der Bewegung.
+ * - Akzeptiert per DnD den Typ `'BEDIENPANEL'` und fügt ihn hinzu, sofern noch keines vorhanden ist.
+ * - Zeigt ein Entfernen-Icon und dispatcht `removeKabine({ side })` beim Klick.
+ * - Rendert nur, wenn eine passende Kabine existiert und mindestens eine Etage vorhanden ist.
+ * - Blendet bei vorhandenem Panel `<Bedienpanel side={side} />` innerhalb der Kabine ein.
+ */
+
 import React from 'react';
 import './KabinenZone.css';
 import { useDispatch, useSelector } from 'react-redux';
@@ -53,8 +64,7 @@ const KabinenZone: React.FC<KabinenZoneProps> = ({ side }) => {
     return (
         <div
             className={`lift-cabin ${side}`}
-            //@ts-ignore
-            ref={dropRef}
+            ref={dropRef as unknown as React.Ref<HTMLDivElement>}
             style={{
                 top: `${top}%`,
                 transition: `top ${travelDuration}s ease-in-out`,
